@@ -45,7 +45,7 @@ defmodule Extensor.Tensor do
 
   Example:
   ```elixir
-  iex> tensor = Extensor.Tensor.from_list([[1, 2], [3, 4]], :float)
+  iex> tensor = Extensor.Tensor.from_list([[1, 2], [3, 4]], :double)
   %Extensor.Tensor{
     type: :double,
     shape: {2, 2},
