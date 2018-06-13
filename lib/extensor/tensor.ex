@@ -102,7 +102,7 @@ defmodule Extensor.Tensor do
       list
       |> List.flatten()
       |> Enum.map(&to_binary(&1, type))
-      |> Enum.reduce(<<>>, &(&2 <> &1))
+      |> IO.iodata_to_binary()
 
     %__MODULE__{type: type, shape: shape, data: data}
   end
