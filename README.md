@@ -28,7 +28,7 @@ end
 
 ### Dependencies
 This project requires the Tensorflow C headers/libraries. For development,
-these can be installed from the steps [here](
+these can be installed by following the [official Tensorflow instructions](
 https://www.tensorflow.org/install/install_c).
 
 For docker deployment, see the sample dockerfiles in the docker directory.
@@ -87,19 +87,19 @@ lengths of the hypotenuses of the first two Pythagorean triples.
 Extensor supports the frozen [graph_def](
 https://www.tensorflow.org/extend/tool_developers/#graphdef) and [saved_model](
 https://www.tensorflow.org/programmers_guide/saved_model) serialization
-formats, via the `load_frozen_graph` and `load_saved_model` functions,
-respectively.
+formats.
 
 For example, the Google [Inception](https://github.com/google/inception)
 [model](http://download.tensorflow.org/models/inception_v3_2016_08_28.tar.gz)
-has its weights frozen to const tensors, so that it can be loaded directly
-from a protobuf.
+has its weights frozen to constant tensors, so that it can be loaded directly
+from a protobuf via `load_frozen_graph`.
 
 However, the frozen graph approach may not work for models that contain
 unfreezable variables (like RNNs). For these models, Extensor supports the
 Tensorflow saved_model format, which is the format used by Tensorflow serving
 (TFS). The saved_model format is loaded from a directory path, which includes
-model metadata and initial variable weights.
+model metadata and initial variable weights. These models can be loaded with
+`load_saved_model`.
 
 ### Configuration
 Extensor supports passing a [ConfigProto](
