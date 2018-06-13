@@ -23,28 +23,31 @@
 ---------------------------------------------------------------------------*/
 class NifError {
 public:
-   NifError () {
-      strncpy(_code, "unknown", sizeof(_code) - 1);
-      _code[sizeof(_code) - 1] = 0;
-   }
-   NifError (const char* code) {
+   NifError (const char* code = "unknown", const char* reason = "") {
       strncpy(_code, code, sizeof(_code) - 1);
       _code[sizeof(_code) - 1] = 0;
+      strncpy(_reason, reason, sizeof(_reason) - 1);
+      _reason[sizeof(_reason) - 1] = 0;
    }
    const char* code () const {
       return _code;
    }
-   ERL_NIF_TERM to_term (ErlNifEnv* env, const char* reason = NULL) const {
+   const char* reason () const {
+      return _reason;
+   }
+   ERL_NIF_TERM to_term (ErlNifEnv* env) const {
       return enif_raise_exception(
          env,
          enif_make_tuple2(
             env,
             enif_make_atom(env, code()),
-            reason ? enif_make_string(env, reason, ERL_NIF_LATIN1) :
-                     enif_make_atom(env, "nil")));
+            strlen(reason())
+               ? enif_make_string(env, reason(), ERL_NIF_LATIN1)
+               : enif_make_atom(env, "nil")));
    }
 private:
    char _code[128 + 1];
+   char _reason[256 + 1];
 };
 /*-------------------[        Global Variables         ]-------------------*/
 /*-------------------[        Global Prototypes        ]-------------------*/
