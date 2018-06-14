@@ -35,12 +35,12 @@ For docker deployment, see the sample dockerfiles in the docker directory.
 Docker for ubuntu can be tested with the following commands.
 
 ```bash
-docker build -t extensor -f docker/ubuntu.dockerfile .
+docker build -t extensor -f docker/ubuntu-cpu.dockerfile .
 docker run --rm -it extensor mix test
 ```
 
-If you have nvidia tools installed, you can test on the GPU by substituting
-`nvidia-docker` for `docker` above.
+If you have nvidia tools installed, you can test on the GPU by using the
+`ubuntu-gpu.dockerfile` and substituting `nvidia-docker` for `docker` above.
 
 ## Usage
 For a simple example, Extensor can be used to evaluate the Pythagorean
