@@ -15,11 +15,18 @@
    (ErlNifFunc){ #name, args, nif_##name, __VA_ARGS__ }
 /*-------------------[        Global Variables         ]-------------------*/
 /*-------------------[        Global Prototypes        ]-------------------*/
+extern int nif_tf_init (ErlNifEnv* env);
 /*-------------------[        Module Variables         ]-------------------*/
 /*-------------------[        Module Prototypes        ]-------------------*/
+DECLARE_NIF(tf_parse_frozen_graph);
+DECLARE_NIF(tf_load_saved_model);
+DECLARE_NIF(tf_run_session);
 /*-------------------[         Implementation          ]-------------------*/
 // nif function table
 static ErlNifFunc nif_map[] = {
+   EXPORT_NIF(tf_parse_frozen_graph, 2),
+   EXPORT_NIF(tf_load_saved_model, 3),
+   EXPORT_NIF(tf_run_session, 3),
 };
 /*-----------< FUNCTION: nif_loaded >----------------------------------------
 // Purpose:    nif onload callback
@@ -32,6 +39,8 @@ static ErlNifFunc nif_map[] = {
 static int nif_loaded (ErlNifEnv* env, void** priv_data, ERL_NIF_TERM state)
 {
    *priv_data = NULL;
+   if (!nif_tf_init(env))
+      return 1;
    return 0;
 }
 // nif entry point

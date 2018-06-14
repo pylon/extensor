@@ -32,14 +32,10 @@ defmodule Extensor.MixProject do
     """
   end
 
-  def application do
-    [
-      extra_applications: [:logger]
-    ]
-  end
-
   defp deps do
     [
+      {:protobuf, "~> 0.5.3"},
+      {:google_protos, "~> 0.1"},
       {:excoveralls, "~> 0.8", only: :test},
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},

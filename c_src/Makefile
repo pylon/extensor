@@ -13,7 +13,7 @@ clean:
 
 rebuild: clean all
 
-$(OUTDIR)/extensor.so: init.cpp
+$(OUTDIR)/extensor.so: init.cpp tf.cpp
 
 %.so:
 	mkdir -p $(dir $@)
