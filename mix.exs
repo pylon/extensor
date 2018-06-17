@@ -5,7 +5,7 @@ defmodule Extensor.MixProject do
     [
       app: :extensor,
       name: "Extensor",
-      version: "0.1.0",
+      version: "0.1.1",
       elixir: "~> 1.6",
       compilers: ["nif" | Mix.compilers()],
       aliases: [clean: ["clean", "clean.nif"]],
