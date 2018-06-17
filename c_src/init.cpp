@@ -24,9 +24,9 @@ DECLARE_NIF(tf_run_session);
 /*-------------------[         Implementation          ]-------------------*/
 // nif function table
 static ErlNifFunc nif_map[] = {
-   EXPORT_NIF(tf_parse_frozen_graph, 2),
-   EXPORT_NIF(tf_load_saved_model, 3),
-   EXPORT_NIF(tf_run_session, 3),
+   EXPORT_NIF(tf_parse_frozen_graph, 2, ERL_NIF_DIRTY_JOB_CPU_BOUND),
+   EXPORT_NIF(tf_load_saved_model, 3, ERL_NIF_DIRTY_JOB_IO_BOUND),
+   EXPORT_NIF(tf_run_session, 3, ERL_NIF_DIRTY_JOB_IO_BOUND),
 };
 /*-----------< FUNCTION: nif_loaded >----------------------------------------
 // Purpose:    nif onload callback
