@@ -21,7 +21,7 @@ jobs:
       - run: mix test
       - run: mix credo --strict -i todo
       - run: mix dialyzer --halt-exit-status
-      - run: "[[ -n $COVERALLS_REPO_TOKEN ]] && mix coveralls.post --sha $(git rev-parse HEAD) --branch $(git rev-parse --abbrev-ref HEAD)"
+      - run: "[[ -n $COVERALLS_REPO_TOKEN ]] && mix coveralls.post --sha $(git rev-parse HEAD) --branch $(git rev-parse --abbrev-ref HEAD) || true"
       - save_cache:
           key: build-{{checksum "mix.lock"}}
           paths:
