@@ -61,8 +61,34 @@ defmodule Extensor.Tensor do
   shape/size don't match.
   """
 
+  @type data_type ::
+          :float
+          | :double
+          | :int32
+          | :uint8
+          | :int16
+          | :int8
+          | :string
+          | :complex64
+          | :complex
+          | :int64
+          | :bool
+          | :qint8
+          | :quint8
+          | :qint32
+          | :bfloat16
+          | :qint16
+          | :quint16
+          | :uint16
+          | :complex128
+          | :half
+          | :resource
+          | :variant
+          | :uint32
+          | :uint64
+
   @type t :: %__MODULE__{
-          type: atom(),
+          type: data_type(),
           shape: tuple(),
           data: binary()
         }
@@ -76,6 +102,7 @@ defmodule Extensor.Tensor do
     uint8: 1,
     int16: 2,
     int8: 1,
+    string: nil,
     complex64: 16,
     complex: 8,
     int64: 8,
@@ -89,12 +116,14 @@ defmodule Extensor.Tensor do
     uint16: 2,
     complex128: 32,
     half: 16,
+    resource: nil,
+    variant: nil,
     uint32: 4,
     uint64: 8
   }
 
   @doc "converts a (nested) list to a tensor structure"
-  @spec from_list(list :: list(), type :: atom()) :: t()
+  @spec from_list(list :: list(), type :: data_type()) :: t()
   def from_list(list, type \\ :float) do
     shape = List.to_tuple(list_shape(list))
 
@@ -182,8 +211,16 @@ defmodule Extensor.Tensor do
   @doc "validates the tensor shape/size"
   @spec validate!(tensor :: t()) :: :ok | no_return()
   def validate!(tensor) do
-    if type_size = Map.get(@type_byte_size, tensor.type) do
-      expect = Enum.reduce(Tuple.to_list(tensor.shape), type_size, &(&1 * &2))
+    if !Map.has_key?(@type_byte_size, tensor.type) do
+      raise ArgumentError, "invalid tensor type: #{tensor.type}"
+    end
+
+    if type_size = Map.fetch!(@type_byte_size, tensor.type) do
+      expect =
+        tensor.shape
+        |> Tuple.to_list()
+        |> Enum.reduce(type_size, &(&1 * &2))
+
       actual = byte_size(tensor.data)
 
       if expect !== actual do

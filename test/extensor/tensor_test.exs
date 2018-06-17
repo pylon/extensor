@@ -71,6 +71,13 @@ defmodule Extensor.TensorTest do
       Tensor.validate!(Tensor.from_list([1, 2, 3], t))
     end
 
+    # invalid tensor type
+    {:error, _e} = Tensor.validate(%Tensor{type: :invalid})
+
+    assert_raise ArgumentError, fn ->
+      Tensor.validate!(%Tensor{type: :invalid})
+    end
+
     # invalid list shape
     {:error, _e} = Tensor.validate(Tensor.from_list([[1, 2], [3]]))
 
