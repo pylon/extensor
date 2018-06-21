@@ -22,7 +22,7 @@ defmodule Extensor.SessionTest do
     # invalid protobuf
     {:error, _e} = Session.parse_frozen_graph("invalid_graph_def")
 
-    assert_raise ErlangError, fn ->
+    assert_raise ErlangError, ~r/tf_error/, fn ->
       Session.parse_frozen_graph!("invalid_graph_def")
     end
 
@@ -48,7 +48,7 @@ defmodule Extensor.SessionTest do
     # invalid file path
     {:error, _e} = Session.load_frozen_graph("invalid_path")
 
-    assert_raise File.Error, fn ->
+    assert_raise File.Error, ~r/no such file/, fn ->
       Session.load_frozen_graph!("invalid_path")
     end
 
@@ -74,14 +74,14 @@ defmodule Extensor.SessionTest do
     # invalid model path
     {:error, _e} = Session.load_saved_model("invalid_path")
 
-    assert_raise ErlangError, fn ->
+    assert_raise ErlangError, ~r/tf_error/, fn ->
       Session.load_saved_model!("invalid_path")
     end
 
     # invalid serving tag
     {:error, _e} = Session.load_saved_model(model_path, config, "invalid_tag")
 
-    assert_raise ErlangError, fn ->
+    assert_raise ErlangError, ~r/tf_error/, fn ->
       Session.load_saved_model!(model_path, config, "invalid_tag")
     end
 
@@ -110,21 +110,29 @@ defmodule Extensor.SessionTest do
 
     {:error, _e} = Session.run(session, %{}, [])
 
-    assert_raise ErlangError, fn -> Session.run!(session, %{}, []) end
-    assert_raise ErlangError, fn -> Session.run!(session, input, []) end
-    assert_raise ErlangError, fn -> Session.run!(session, %{}, ["c"]) end
+    assert_raise ErlangError, ~r/tf_error/, fn ->
+      Session.run!(session, %{}, [])
+    end
+
+    assert_raise ErlangError, ~r/tf_error/, fn ->
+      Session.run!(session, input, [])
+    end
+
+    assert_raise ErlangError, ~r/tf_error/, fn ->
+      Session.run!(session, %{}, ["c"])
+    end
 
     # invalid tensor name
-    assert_raise ErlangError, fn ->
+    assert_raise ErlangError, ~r/invalid_tensor_name/, fn ->
       Session.run!(session, Map.put(input, 42, Tensor.from_list([5])), ["c"])
     end
 
-    assert_raise ErlangError, fn ->
+    assert_raise ErlangError, ~r/invalid_tensor_name/, fn ->
       Session.run!(session, input, [42])
     end
 
-    assert_raise ErlangError, fn ->
-      Session.run!(session, input, ["d"])
+    assert_raise ErlangError, ~r/tensor_not_found.*missing_tensor/, fn ->
+      Session.run!(session, input, ["missing_tensor"])
     end
 
     # invalid tensor shape
@@ -133,7 +141,9 @@ defmodule Extensor.SessionTest do
       "b" => Tensor.from_list([[4], [5, 6]])
     }
 
-    assert_raise ArgumentError, fn -> Session.run!(session, input, ["c"]) end
+    assert_raise ArgumentError, ~r/tensor size mismatch/, fn ->
+      Session.run!(session, input, ["c"])
+    end
 
     # valid tensors
     input = %{
