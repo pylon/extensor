@@ -451,7 +451,8 @@ void erl2tf_input(
    // configure the tensor input
    TF_Operation* op = CHECK(
       TF_GraphOperationByName(graph, key_str),
-      "tensor_not_found");
+      "tensor_not_found",
+      key_str);
    config[index].oper  = op;
    config[index].index = op_index;
 }
@@ -491,7 +492,8 @@ void erl2tf_outputs(
       // configure the tensor output
       TF_Operation* op = CHECK(
          TF_GraphOperationByName(graph, name_str),
-         "tensor_not_found");
+         "tensor_not_found",
+         name_str);
       config[i].oper  = op;
       config[i].index = op_index;
       // configure the operation to execute
