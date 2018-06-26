@@ -7,8 +7,9 @@ defmodule Extensor.MixProject do
       name: "Extensor",
       version: "0.1.1",
       elixir: "~> 1.6",
-      compilers: ["nif" | Mix.compilers()],
-      aliases: [clean: ["clean", "clean.nif"]],
+      compilers: [:elixir_make] ++ Mix.compilers(),
+      make_cwd: "c_src",
+      make_clean: ["clean"],
       description: description(),
       deps: deps(),
       package: package(),
@@ -37,6 +38,7 @@ defmodule Extensor.MixProject do
       {:protobuf, "~> 0.5.3"},
       {:google_protos, "~> 0.1"},
       {:excoveralls, "~> 0.8", only: :test},
+      {:elixir_make, "~> 0.4", runtime: false},
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:benchee, "~> 0.9", only: :dev, runtime: false},
@@ -60,19 +62,5 @@ defmodule Extensor.MixProject do
         "Docs" => "http://hexdocs.pm/extensor/"
       }
     ]
-  end
-end
-
-defmodule Mix.Tasks.Compile.Nif do
-  def run(_args) do
-    {result, 0} = System.cmd("make", ["-C", "c_src"])
-    IO.binwrite(result)
-  end
-end
-
-defmodule Mix.Tasks.Clean.Nif do
-  def run(_args) do
-    {result, 0} = System.cmd("make", ["-C", "c_src", "clean"])
-    IO.binwrite(result)
   end
 end
