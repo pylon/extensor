@@ -184,14 +184,14 @@ a = Matrex.new([[3, 5], [7, 9]])
 b = Matrex.new([[4, 12], [24, 40]])
 
 input = %{
-  "a" => Extensor.Tensor.from_matrix(a),
-  "b" => Extensor.Tensor.from_matrix(b)
+  "a" => Extensor.Matrex.to_tensor(a),
+  "b" => Extensor.Matrex.to_tensor(b)
 }
 
 session = Extensor.Session.load_frozen_graph!("test/data/pythagoras.pb")
 output = Extensor.Session.run!(session, input, ["c"])
 
-output |> Map.get("c") |> Extensor.Tensor.to_matrix()
+output |> Map.get("c") |> Extensor.Matrex.from_tensor()
 ```
 
 This block should output a 2x2 matrix, which corresponds to the
