@@ -230,47 +230,4 @@ defmodule Extensor.Tensor do
 
     :ok
   end
-
-  @doc """
-  Convert a `Matrex` matrix to a tensor struct
-  """
-  @spec from_matrix(matrix :: Matrex.t()) :: t()
-  def from_matrix(%Matrex{
-        data:
-          <<rows::unsigned-integer-little-32,
-            cols::unsigned-integer-little-32, body::binary>>
-      }) do
-    %__MODULE__{
-      type: :float,
-      shape: {rows, cols},
-      data: body
-    }
-  end
-
-  @doc """
-  Convert from a tensor struct to a `Matrex` matrix
-
-  Currently, this only works for two dimensional tensors and the type _must be_
-  `:float`.
-  """
-  @spec to_matrix(tensor :: t()) :: Matrex.t()
-  def to_matrix(tensor) do
-    cond do
-      tensor.type != :float ->
-        raise ArgumentError, "invalid tensor type: #{tensor.type}"
-
-      tuple_size(tensor.shape) != 2 ->
-        raise ArgumentError,
-              "invalid tensor shape: #{tuple_size(tensor.shape)}"
-
-      true ->
-        {r, c} = tensor.shape
-
-        %Matrex{
-          data:
-            <<r::unsigned-integer-little-32, c::unsigned-integer-little-32>> <>
-              tensor.data
-        }
-    end
-  end
 end
