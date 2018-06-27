@@ -85,4 +85,32 @@ defmodule Extensor.TensorTest do
       Tensor.validate!(Tensor.from_list([[1, 2], [3]]))
     end
   end
+
+  describe "matrix conversion" do
+    test "from_matrix/1" do
+      lol = [[1, 2], [3, 4]]
+
+      # converting from a matrix
+      assert Tensor.from_list(lol, :float) ==
+               lol |> Matrex.new() |> Tensor.from_matrix()
+    end
+
+    test "to_matrix/1" do
+      lol = [[1, 2], [3, 4]]
+
+      # round tripping to a matrix
+      assert Matrex.new(lol) ==
+               lol |> Tensor.from_list(:float) |> Tensor.to_matrix()
+
+      # invalid type
+      assert_raise(ArgumentError, fn ->
+        lol |> Tensor.from_list(:double) |> Tensor.to_matrix()
+      end)
+
+      # invalid shape
+      assert_raise(ArgumentError, fn ->
+        lol |> List.first() |> Tensor.from_list(:float) |> Tensor.to_matrix()
+      end)
+    end
+  end
 end
