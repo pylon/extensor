@@ -172,6 +172,30 @@ with the tensor shape. The following is an example of a tensor struct.
 }
 ```
 
+## Matrex Integration
+
+Extensor supports optional integration with
+[Matrex](https://hexdocs.pm/matrex/Matrex.html). To demonstrate, we'll re-use
+our Pythagoras example [test/data/pythagoras.pb](
+https://github.com/pylon/extensor/tree/master/test/data/pythagoras.pb)
+
+```elixir
+a = Matrex.new([[3, 5], [7, 9]])
+b = Matrex.new([[4, 12], [24, 40]])
+
+input = %{
+  "a" => Extensor.Tensor.from_matrix(a),
+  "b" => Extensor.Tensor.from_matrix(b)
+}
+
+session = Extensor.Session.load_frozen_graph!("test/data/pythagoras.pb")
+output = Extensor.Session.run!(session, input, ["c"])
+
+output |> Map.get("c") |> Extensor.Tensor.to_matrix()
+```
+
+This block should output a 2x2 matrix, which corresponds to the
+lengths of the hypotenuses of the first four Pythagorean triples.
 
 ## Development
 The Tensorflow protocol buffer wrappers were generated using the
