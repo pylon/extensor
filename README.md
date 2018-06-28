@@ -10,7 +10,7 @@ relied on for production use.
 
 ## Status
 [![Hex](http://img.shields.io/hexpm/v/extensor.svg?style=flat)](https://hex.pm/packages/extensor)
-[![Test](http://circleci-badges-max.herokuapp.com/img/pylon/extensor?token=:circle-ci-token)](https://circleci.com/gh/pylon/extensor)
+[![CircleCI](https://circleci.com/gh/pylon/extensor.svg?style=shield)](https://circleci.com/gh/pylon/extensor)
 [![Coverage](https://coveralls.io/repos/github/pylon/extensor/badge.svg)](https://coveralls.io/github/pylon/extensor)
 
 The API reference is available [here](https://hexdocs.pm/extensor/).
