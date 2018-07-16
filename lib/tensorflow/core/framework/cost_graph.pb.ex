@@ -29,8 +29,7 @@ defmodule Tensorflow.CostGraphDef.Node do
           compute_time: integer,
           memory_time: integer,
           is_final: boolean,
-          control_input: [integer],
-          inaccurate: boolean
+          control_input: [integer]
         }
   defstruct [
     :name,
@@ -47,8 +46,7 @@ defmodule Tensorflow.CostGraphDef.Node do
     :compute_time,
     :memory_time,
     :is_final,
-    :control_input,
-    :inaccurate
+    :control_input
   ]
 
   field(:name, 1, type: :string)
@@ -79,7 +77,6 @@ defmodule Tensorflow.CostGraphDef.Node do
   field(:memory_time, 15, type: :int64)
   field(:is_final, 7, type: :bool)
   field(:control_input, 8, repeated: true, type: :int32)
-  field(:inaccurate, 17, type: :bool)
 end
 
 defmodule Tensorflow.CostGraphDef.Node.InputInfo do
