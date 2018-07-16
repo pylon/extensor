@@ -88,6 +88,21 @@ defmodule Extensor.Session do
 
   @tft2atom Map.new(@atom2tft, fn {k, v} -> {v, k} end)
 
+  @doc "loads a custom op kernel library"
+  @spec load_library(name :: String.t()) :: :ok | {:error, any()}
+  def load_library(name) do
+    load_library!(name)
+    :ok
+  rescue
+    e -> {:error, e}
+  end
+
+  @doc "loads a custom op kernel library"
+  @spec load_library!(name :: String.t()) :: :ok
+  def load_library!(name) do
+    NIF.tf_load_library(name)
+  end
+
   @doc "loads a graph_def from a file path"
   @spec load_frozen_graph(
           path :: String.t(),
