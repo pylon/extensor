@@ -17,6 +17,12 @@ defmodule Extensor.NIF do
     end
   end
 
+  @doc "loads a custom op kernel library"
+  @spec tf_load_library(name :: String.t()) :: :ok
+  def tf_load_library(_name) do
+    :erlang.nif_error(:nif_library_not_loaded)
+  end
+
   @doc "loads a graph_def protobuf into a new tensorflow session"
   @spec tf_parse_frozen_graph(graph_pb :: binary(), config_pb :: binary()) ::
           reference()

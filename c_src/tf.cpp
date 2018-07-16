@@ -84,6 +84,45 @@ int nif_tf_init (ErlNifEnv* env)
       return 0;
    return 1;
 }
+/*-----------< FUNCTION: nif_tf_load_library >-------------------------------
+// Purpose:    loads a custom op kernel library and register its ops
+// Parameters: name - name of the op kernel library to load
+// Returns:    :ok
+---------------------------------------------------------------------------*/
+ERL_NIF_TERM nif_tf_load_library (
+   ErlNifEnv*         env,
+   int                argc,
+   const ERL_NIF_TERM argv[])
+{
+   // validate parameters
+   if (!enif_is_binary(env, argv[0]))
+      return enif_make_badarg(env);
+   // load the kernel library
+   TF_Status* status = NULL;
+   ERL_NIF_TERM result;
+   try {
+      status = CHECKALLOC(TF_NewStatus());
+      // retrieve the library name
+      ErlNifBinary name_bin; memset(&name_bin, 0, sizeof(name_bin));
+      CHECK(enif_inspect_binary(env, argv[0], &name_bin), "invalid_name");
+      char name_str[name_bin.size + 1]; memset(name_str, 0, sizeof(name_str));
+      memcpy(name_str, name_bin.data, name_bin.size);
+      // load the tensorflow library
+      // the static initializer will register its kernels, so it
+      // can be freed after being loaded
+      TF_Library* handle = TF_LoadLibrary(name_str, status);
+      tf_check_status(status);
+      TF_DeleteLibraryHandle(handle);
+      // return ok
+      result = enif_make_atom(env, "ok");
+   } catch (NifError& e) {
+      result = e.to_term(env);
+   }
+   // clean up
+   if (status != NULL)
+      TF_DeleteStatus(status);
+   return result;
+}
 /*-----------< FUNCTION: nif_tf_parse_frozen_graph >-------------------------
 // Purpose:    reads a tensorflow graph_def and attaches it to a new session
 //             . uses TF_GraphImportGraphDef to load the graph definition

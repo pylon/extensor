@@ -11,6 +11,18 @@ defmodule Extensor.SessionTest do
     {:ok, []}
   end
 
+  test "custom op kernel library" do
+    # smoke test only, building a test kernel is outside extensor's scope
+    {:error, _e} = Session.load_library("invalid")
+
+    assert_raise ErlangError, ~r/tf_error/, fn ->
+      Session.load_library!("invalid")
+    end
+
+    :ok = Session.load_library("libtensorflow.so")
+    Session.load_library!("libtensorflow.so")
+  end
+
   test "parse frozen graph" do
     config = %{
       ConfigProto.new()
