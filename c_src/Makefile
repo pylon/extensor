@@ -2,7 +2,7 @@ ERLANG_PATH ?= $(shell erl -eval 'io:format("~s", [lists:concat([code:root_dir()
 CC           = g++
 CFLAGS       = -Wall -O3 -fpic -Wl,-undefined,dynamic_lookup -shared \
                -I$(ERLANG_PATH)/include -L$(ERLANG_PATH)/lib
-LIBS         = -lerts -ltensorflow
+LIBS         = -ltensorflow
 OBJDIR       = ../obj
 OUTDIR       = ../priv
 

@@ -5,8 +5,8 @@ defmodule Extensor.MixProject do
     [
       app: :extensor,
       name: "Extensor",
-      version: "0.1.4",
-      elixir: "~> 1.6",
+      version: "0.1.5",
+      elixir: "~> 1.7",
       compilers: [:elixir_make] ++ Mix.compilers(),
       make_cwd: "c_src",
       make_clean: ["clean"],
@@ -40,10 +40,10 @@ defmodule Extensor.MixProject do
       {:matrex, "~> 0.6", optional: true},
       {:excoveralls, "~> 0.8", only: :test},
       {:elixir_make, "~> 0.4", runtime: false},
-      {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
+      {:credo, "~> 0.10", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:benchee, "~> 0.9", only: :dev, runtime: false},
-      {:ex_doc, "~> 0.18", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.19", only: :dev, runtime: false}
     ]
   end
 
