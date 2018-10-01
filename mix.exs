@@ -38,7 +38,7 @@ defmodule Extensor.MixProject do
       {:protobuf, "~> 0.5.3"},
       {:google_protos, "~> 0.1"},
       {:matrex, "~> 0.6", optional: true},
-      {:excoveralls, "~> 0.8", only: :test},
+      {:excoveralls, "~> 0.10", only: :test},
       {:elixir_make, "~> 0.4", runtime: false},
       {:credo, "~> 0.10", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},

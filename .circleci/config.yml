@@ -12,7 +12,7 @@ jobs:
             - build-{{checksum "mix.lock"}}
       - run: git submodule sync
       - run: git submodule update --init
-      - run: curl -L https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-cpu-linux-x86_64-1.9.0.tar.gz | sudo tar -C /usr/local -xz
+      - run: curl -L https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-cpu-linux-x86_64-1.10.0.tar.gz | sudo tar -C /usr/local -xz
       - run: sudo apt-get install libatlas-base-dev
       - run: sudo ldconfig
       - run: mix local.hex --force
