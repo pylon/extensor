@@ -5,7 +5,7 @@ RUN apt-get update -qq && apt-get install -y \
       build-essential curl locales libatlas-base-dev
 
 # install tensorflow
-RUN curl -L https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-cpu-linux-x86_64-1.10.0.tar.gz | \
+RUN curl -L https://storage.googleapis.com/tensorflow/libtensorflow/libtensorflow-cpu-linux-x86_64-1.12.0.tar.gz | \
       tar -C /usr/local -xz
 
 # install elixir
