@@ -5,7 +5,7 @@ defmodule Extensor.MixProject do
     [
       app: :extensor,
       name: "Extensor",
-      version: "0.1.5",
+      version: "0.1.6",
       elixir: "~> 1.7",
       compilers: [:elixir_make] ++ Mix.compilers(),
       make_cwd: "c_src",
