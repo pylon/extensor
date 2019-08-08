@@ -5,7 +5,7 @@ defmodule Extensor.MixProject do
     [
       app: :extensor,
       name: "Extensor",
-      version: "0.1.6",
+      version: "1.14.0",
       elixir: "~> 1.7",
       compilers: [:elixir_make] ++ Mix.compilers(),
       make_cwd: "c_src",
@@ -35,15 +35,15 @@ defmodule Extensor.MixProject do
 
   defp deps do
     [
-      {:protobuf, "~> 0.5.3"},
+      {:protobuf, "~> 0.6"},
       {:google_protos, "~> 0.1"},
       {:matrex, "~> 0.6", optional: true},
-      {:excoveralls, "~> 0.10", only: :test},
-      {:elixir_make, "~> 0.4", runtime: false},
-      {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:excoveralls, "~> 0.11", only: :test},
+      {:elixir_make, "~> 0.6", runtime: false},
+      {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
-      {:benchee, "~> 0.9", only: :dev, runtime: false},
-      {:ex_doc, "~> 0.19", only: :dev, runtime: false}
+      {:benchee, "~> 1.0", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.21", only: :dev, runtime: false}
     ]
   end
 
