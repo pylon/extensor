@@ -115,7 +115,7 @@ defmodule Extensor.Tensor do
     quint16: 2,
     uint16: 2,
     complex128: 32,
-    half: 16,
+    half: 2,
     resource: nil,
     variant: nil,
     uint32: 4,
