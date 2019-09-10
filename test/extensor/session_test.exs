@@ -19,8 +19,8 @@ defmodule Extensor.SessionTest do
       Session.load_library!("invalid")
     end
 
-    :ok = Session.load_library("libtensorflow.so")
-    Session.load_library!("libtensorflow.so")
+    :ok = Session.load_library("priv/extensor.so")
+    Session.load_library!("priv/extensor.so")
   end
 
   test "parse frozen graph" do
