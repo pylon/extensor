@@ -21,7 +21,7 @@ The API reference is available [here](https://hexdocs.pm/extensor/).
 ```elixir
 def deps do
   [
-    {:extensor, "~> 0.1"}
+    {:extensor, "~> 2.1"}
   ]
 end
 ```
@@ -204,7 +204,13 @@ with the following command, assuming Tensorflow is cloned in the
 ../tensorflow directory:
 
 ```bash
-protoc --elixir_out=lib --proto_path=../tensorflow $(ls -1 ../tensorflow/tensorflow/core/framework/*.proto ../tensorflow/tensorflow/core/protobuf/*.proto)
+protoc \
+  --elixir_out=lib \
+  --proto_path=../tensorflow \
+  $(ls -1 \
+    ../tensorflow/tensorflow/core/framework/*.proto \
+    ../tensorflow/tensorflow/core/protobuf/*.proto \
+    ../tensorflow/tensorflow/stream_executor/*.proto)
 ```
 
 ## License

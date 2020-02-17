@@ -1,3 +1,13 @@
+defmodule Tensorflow.GraphTransferInfo.Destination do
+  @moduledoc false
+  use Protobuf, enum: true, syntax: :proto3
+
+  @type t :: integer | :NOP | :HEXAGON
+
+  field(:NOP, 0)
+  field(:HEXAGON, 1)
+end
+
 defmodule Tensorflow.GraphTransferNodeInput do
   @moduledoc false
   use Protobuf, syntax: :proto3
@@ -52,8 +62,8 @@ defmodule Tensorflow.GraphTransferConstNodeInfo do
           name: String.t(),
           node_id: integer,
           shape: [integer],
-          data: String.t(),
-          dtype: integer
+          data: binary,
+          dtype: Tensorflow.DataType.t()
         }
   defstruct [:name, :node_id, :shape, :data, :dtype]
 
@@ -76,9 +86,7 @@ defmodule Tensorflow.GraphTransferNodeInputInfo do
 
   field(:node_id, 1, type: :int32)
 
-  field(
-    :node_input,
-    2,
+  field(:node_input, 2,
     repeated: true,
     type: Tensorflow.GraphTransferNodeInput
   )
@@ -105,7 +113,7 @@ defmodule Tensorflow.GraphTransferGraphInputNodeInfo do
   @type t :: %__MODULE__{
           name: String.t(),
           shape: [integer],
-          dtype: integer
+          dtype: Tensorflow.DataType.t()
         }
   defstruct [:name, :shape, :dtype]
 
@@ -121,7 +129,7 @@ defmodule Tensorflow.GraphTransferGraphOutputNodeInfo do
   @type t :: %__MODULE__{
           name: String.t(),
           shape: [integer],
-          dtype: integer
+          dtype: Tensorflow.DataType.t()
         }
   defstruct [:name, :shape, :dtype]
 
@@ -145,7 +153,7 @@ defmodule Tensorflow.GraphTransferInfo do
           graph_output_node_info: [
             Tensorflow.GraphTransferGraphOutputNodeInfo.t()
           ],
-          destination: integer
+          destination: Tensorflow.GraphTransferInfo.Destination.t()
         }
   defstruct [
     :node_info,
@@ -159,53 +167,33 @@ defmodule Tensorflow.GraphTransferInfo do
 
   field(:node_info, 1, repeated: true, type: Tensorflow.GraphTransferNodeInfo)
 
-  field(
-    :const_node_info,
-    2,
+  field(:const_node_info, 2,
     repeated: true,
     type: Tensorflow.GraphTransferConstNodeInfo
   )
 
-  field(
-    :node_input_info,
-    3,
+  field(:node_input_info, 3,
     repeated: true,
     type: Tensorflow.GraphTransferNodeInputInfo
   )
 
-  field(
-    :node_output_info,
-    4,
+  field(:node_output_info, 4,
     repeated: true,
     type: Tensorflow.GraphTransferNodeOutputInfo
   )
 
-  field(
-    :graph_input_node_info,
-    5,
+  field(:graph_input_node_info, 5,
     repeated: true,
     type: Tensorflow.GraphTransferGraphInputNodeInfo
   )
 
-  field(
-    :graph_output_node_info,
-    6,
+  field(:graph_output_node_info, 6,
     repeated: true,
     type: Tensorflow.GraphTransferGraphOutputNodeInfo
   )
 
-  field(
-    :destination,
-    7,
+  field(:destination, 7,
     type: Tensorflow.GraphTransferInfo.Destination,
     enum: true
   )
-end
-
-defmodule Tensorflow.GraphTransferInfo.Destination do
-  @moduledoc false
-  use Protobuf, enum: true, syntax: :proto3
-
-  field(:NOP, 0)
-  field(:HEXAGON, 1)
 end

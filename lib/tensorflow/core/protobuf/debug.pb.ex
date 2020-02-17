@@ -30,18 +30,18 @@ defmodule Tensorflow.DebugOptions do
 
   @type t :: %__MODULE__{
           debug_tensor_watch_opts: [Tensorflow.DebugTensorWatch.t()],
-          global_step: integer
+          global_step: integer,
+          reset_disk_byte_usage: boolean
         }
-  defstruct [:debug_tensor_watch_opts, :global_step]
+  defstruct [:debug_tensor_watch_opts, :global_step, :reset_disk_byte_usage]
 
-  field(
-    :debug_tensor_watch_opts,
-    4,
+  field(:debug_tensor_watch_opts, 4,
     repeated: true,
     type: Tensorflow.DebugTensorWatch
   )
 
   field(:global_step, 10, type: :int64)
+  field(:reset_disk_byte_usage, 11, type: :bool)
 end
 
 defmodule Tensorflow.DebuggedSourceFile do

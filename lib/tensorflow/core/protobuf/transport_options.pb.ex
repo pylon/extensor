@@ -3,9 +3,9 @@ defmodule Tensorflow.RecvBufRespExtra do
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
-          tensor_content: String.t()
+          tensor_content: [binary]
         }
   defstruct [:tensor_content]
 
-  field(:tensor_content, 1, type: :bytes)
+  field(:tensor_content, 1, repeated: true, type: :bytes)
 end

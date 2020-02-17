@@ -1,12 +1,12 @@
 
 ,
-aPlaceholder*
-shape:*
-dtype0
+aPlaceholder*
+dtype0*
+shape:
 ,
-bPlaceholder*
-shape:*
-dtype0
+bPlaceholder*
+dtype0*
+shape:
 
 SquareSquarea*
 T0
@@ -18,4 +18,4 @@
 T0
 
 cSqrtAdd*
-T0"
+T0"¯

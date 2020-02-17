@@ -1,3 +1,14 @@
+defmodule Tensorflow.SaverDef.CheckpointFormatVersion do
+  @moduledoc false
+  use Protobuf, enum: true, syntax: :proto3
+
+  @type t :: integer | :LEGACY | :V1 | :V2
+
+  field(:LEGACY, 0)
+  field(:V1, 1)
+  field(:V2, 2)
+end
+
 defmodule Tensorflow.SaverDef do
   @moduledoc false
   use Protobuf, syntax: :proto3
@@ -8,8 +19,9 @@ defmodule Tensorflow.SaverDef do
           restore_op_name: String.t(),
           max_to_keep: integer,
           sharded: boolean,
-          keep_checkpoint_every_n_hours: float,
-          version: integer
+          keep_checkpoint_every_n_hours:
+            float | :infinity | :negative_infinity | :nan,
+          version: Tensorflow.SaverDef.CheckpointFormatVersion.t()
         }
   defstruct [
     :filename_tensor_name,
@@ -28,19 +40,8 @@ defmodule Tensorflow.SaverDef do
   field(:sharded, 5, type: :bool)
   field(:keep_checkpoint_every_n_hours, 6, type: :float)
 
-  field(
-    :version,
-    7,
+  field(:version, 7,
     type: Tensorflow.SaverDef.CheckpointFormatVersion,
     enum: true
   )
-end
-
-defmodule Tensorflow.SaverDef.CheckpointFormatVersion do
-  @moduledoc false
-  use Protobuf, enum: true, syntax: :proto3
-
-  field(:LEGACY, 0)
-  field(:V1, 1)
-  field(:V2, 2)
 end

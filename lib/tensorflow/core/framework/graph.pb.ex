@@ -4,9 +4,9 @@ defmodule Tensorflow.GraphDef do
 
   @type t :: %__MODULE__{
           node: [Tensorflow.NodeDef.t()],
-          versions: Tensorflow.VersionDef.t(),
+          versions: Tensorflow.VersionDef.t() | nil,
           version: integer,
-          library: Tensorflow.FunctionDefLibrary.t()
+          library: Tensorflow.FunctionDefLibrary.t() | nil
         }
   defstruct [:node, :versions, :version, :library]
 

@@ -19,7 +19,7 @@ defmodule Tensorflow.MemoryLogTensorAllocation do
   @type t :: %__MODULE__{
           step_id: integer,
           kernel_name: String.t(),
-          tensor: Tensorflow.TensorDescription.t()
+          tensor: Tensorflow.TensorDescription.t() | nil
         }
   defstruct [:step_id, :kernel_name, :tensor]
 
@@ -50,7 +50,7 @@ defmodule Tensorflow.MemoryLogTensorOutput do
           step_id: integer,
           kernel_name: String.t(),
           index: integer,
-          tensor: Tensorflow.TensorDescription.t()
+          tensor: Tensorflow.TensorDescription.t() | nil
         }
   defstruct [:step_id, :kernel_name, :index, :tensor]
 

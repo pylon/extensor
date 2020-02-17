@@ -33,7 +33,7 @@ defmodule Tensorflow.DeviceLocality do
   @type t :: %__MODULE__{
           bus_id: integer,
           numa_node: integer,
-          links: Tensorflow.LocalLinks.t()
+          links: Tensorflow.LocalLinks.t() | nil
         }
   defstruct [:bus_id, :numa_node, :links]
 
@@ -50,7 +50,7 @@ defmodule Tensorflow.DeviceAttributes do
           name: String.t(),
           device_type: String.t(),
           memory_limit: integer,
-          locality: Tensorflow.DeviceLocality.t(),
+          locality: Tensorflow.DeviceLocality.t() | nil,
           incarnation: non_neg_integer,
           physical_device_desc: String.t()
         }

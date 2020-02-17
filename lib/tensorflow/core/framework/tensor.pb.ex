@@ -3,19 +3,19 @@ defmodule Tensorflow.TensorProto do
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
-          dtype: integer,
-          tensor_shape: Tensorflow.TensorShapeProto.t(),
+          dtype: Tensorflow.DataType.t(),
+          tensor_shape: Tensorflow.TensorShapeProto.t() | nil,
           version_number: integer,
-          tensor_content: String.t(),
+          tensor_content: binary,
           half_val: [integer],
-          float_val: [float],
-          double_val: [float],
+          float_val: [float | :infinity | :negative_infinity | :nan],
+          double_val: [float | :infinity | :negative_infinity | :nan],
           int_val: [integer],
-          string_val: [String.t()],
-          scomplex_val: [float],
+          string_val: [binary],
+          scomplex_val: [float | :infinity | :negative_infinity | :nan],
           int64_val: [integer],
           bool_val: [boolean],
-          dcomplex_val: [float],
+          dcomplex_val: [float | :infinity | :negative_infinity | :nan],
           resource_handle_val: [Tensorflow.ResourceHandleProto.t()],
           variant_val: [Tensorflow.VariantTensorDataProto.t()],
           uint32_val: [non_neg_integer],
@@ -55,16 +55,12 @@ defmodule Tensorflow.TensorProto do
   field(:bool_val, 11, repeated: true, type: :bool, packed: true)
   field(:dcomplex_val, 12, repeated: true, type: :double, packed: true)
 
-  field(
-    :resource_handle_val,
-    14,
+  field(:resource_handle_val, 14,
     repeated: true,
     type: Tensorflow.ResourceHandleProto
   )
 
-  field(
-    :variant_val,
-    15,
+  field(:variant_val, 15,
     repeated: true,
     type: Tensorflow.VariantTensorDataProto
   )
@@ -79,7 +75,7 @@ defmodule Tensorflow.VariantTensorDataProto do
 
   @type t :: %__MODULE__{
           type_name: String.t(),
-          metadata: String.t(),
+          metadata: binary,
           tensors: [Tensorflow.TensorProto.t()]
         }
   defstruct [:type_name, :metadata, :tensors]

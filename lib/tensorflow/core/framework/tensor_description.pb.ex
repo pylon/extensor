@@ -3,9 +3,9 @@ defmodule Tensorflow.TensorDescription do
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
-          dtype: integer,
-          shape: Tensorflow.TensorShapeProto.t(),
-          allocation_description: Tensorflow.AllocationDescription.t()
+          dtype: Tensorflow.DataType.t(),
+          shape: Tensorflow.TensorShapeProto.t() | nil,
+          allocation_description: Tensorflow.AllocationDescription.t() | nil
         }
   defstruct [:dtype, :shape, :allocation_description]
 

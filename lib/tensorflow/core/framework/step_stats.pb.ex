@@ -38,9 +38,7 @@ defmodule Tensorflow.AllocatorMemoryUsed do
   field(:peak_bytes, 3, type: :int64)
   field(:live_bytes, 4, type: :int64)
 
-  field(
-    :allocation_records,
-    6,
+  field(:allocation_records, 6,
     repeated: true,
     type: Tensorflow.AllocationRecord
   )
@@ -54,7 +52,7 @@ defmodule Tensorflow.NodeOutput do
 
   @type t :: %__MODULE__{
           slot: integer,
-          tensor_description: Tensorflow.TensorDescription.t()
+          tensor_description: Tensorflow.TensorDescription.t() | nil
         }
   defstruct [:slot, :tensor_description]
 
@@ -89,9 +87,7 @@ defmodule Tensorflow.MemoryStats do
   field(:device_temp_memory_size, 2, type: :int64, deprecated: true)
   field(:device_persistent_memory_size, 4, type: :int64, deprecated: true)
 
-  field(
-    :device_persistent_tensor_alloc_ids,
-    6,
+  field(:device_persistent_tensor_alloc_ids, 6,
     repeated: true,
     type: :int64,
     deprecated: true
@@ -114,7 +110,12 @@ defmodule Tensorflow.NodeExecStats do
           scheduled_micros: integer,
           thread_id: non_neg_integer,
           referenced_tensor: [Tensorflow.AllocationDescription.t()],
-          memory_stats: Tensorflow.MemoryStats.t()
+          memory_stats: Tensorflow.MemoryStats.t() | nil,
+          all_start_nanos: integer,
+          op_start_rel_nanos: integer,
+          op_end_rel_nanos: integer,
+          all_end_rel_nanos: integer,
+          scheduled_nanos: integer
         }
   defstruct [
     :node_name,
@@ -128,7 +129,12 @@ defmodule Tensorflow.NodeExecStats do
     :scheduled_micros,
     :thread_id,
     :referenced_tensor,
-    :memory_stats
+    :memory_stats,
+    :all_start_nanos,
+    :op_start_rel_nanos,
+    :op_end_rel_nanos,
+    :all_end_rel_nanos,
+    :scheduled_nanos
   ]
 
   field(:node_name, 1, type: :string)
@@ -142,14 +148,31 @@ defmodule Tensorflow.NodeExecStats do
   field(:scheduled_micros, 9, type: :int64)
   field(:thread_id, 10, type: :uint32)
 
-  field(
-    :referenced_tensor,
-    11,
+  field(:referenced_tensor, 11,
     repeated: true,
     type: Tensorflow.AllocationDescription
   )
 
   field(:memory_stats, 12, type: Tensorflow.MemoryStats)
+  field(:all_start_nanos, 13, type: :int64)
+  field(:op_start_rel_nanos, 14, type: :int64)
+  field(:op_end_rel_nanos, 15, type: :int64)
+  field(:all_end_rel_nanos, 16, type: :int64)
+  field(:scheduled_nanos, 17, type: :int64)
+end
+
+defmodule Tensorflow.DeviceStepStats.ThreadNamesEntry do
+  @moduledoc false
+  use Protobuf, map: true, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          key: non_neg_integer,
+          value: String.t()
+        }
+  defstruct [:key, :value]
+
+  field(:key, 1, type: :uint32)
+  field(:value, 2, type: :string)
 end
 
 defmodule Tensorflow.DeviceStepStats do
@@ -158,12 +181,19 @@ defmodule Tensorflow.DeviceStepStats do
 
   @type t :: %__MODULE__{
           device: String.t(),
-          node_stats: [Tensorflow.NodeExecStats.t()]
+          node_stats: [Tensorflow.NodeExecStats.t()],
+          thread_names: %{non_neg_integer => String.t()}
         }
-  defstruct [:device, :node_stats]
+  defstruct [:device, :node_stats, :thread_names]
 
   field(:device, 1, type: :string)
   field(:node_stats, 2, repeated: true, type: Tensorflow.NodeExecStats)
+
+  field(:thread_names, 3,
+    repeated: true,
+    type: Tensorflow.DeviceStepStats.ThreadNamesEntry,
+    map: true
+  )
 end
 
 defmodule Tensorflow.StepStats do
