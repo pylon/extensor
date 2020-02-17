@@ -1,24 +1,3 @@
-defmodule Tensorflow.ValuesDef do
-  @moduledoc false
-  use Protobuf, syntax: :proto3
-
-  @type t :: %__MODULE__{
-          values: [String.t()],
-          external_values: %{String.t() => String.t()}
-        }
-  defstruct [:values, :external_values]
-
-  field(:values, 1, repeated: true, type: :string)
-
-  field(
-    :external_values,
-    2,
-    repeated: true,
-    type: Tensorflow.ValuesDef.ExternalValuesEntry,
-    map: true
-  )
-end
-
 defmodule Tensorflow.ValuesDef.ExternalValuesEntry do
   @moduledoc false
   use Protobuf, map: true, syntax: :proto3
@@ -31,6 +10,25 @@ defmodule Tensorflow.ValuesDef.ExternalValuesEntry do
 
   field(:key, 1, type: :string)
   field(:value, 2, type: :string)
+end
+
+defmodule Tensorflow.ValuesDef do
+  @moduledoc false
+  use Protobuf, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          values: [String.t()],
+          external_values: %{String.t() => String.t()}
+        }
+  defstruct [:values, :external_values]
+
+  field(:values, 1, repeated: true, type: :string)
+
+  field(:external_values, 2,
+    repeated: true,
+    type: Tensorflow.ValuesDef.ExternalValuesEntry,
+    map: true
+  )
 end
 
 defmodule Tensorflow.ControlFlowContextDef do
@@ -56,7 +54,7 @@ defmodule Tensorflow.CondContextDef do
           pred_name: String.t(),
           pivot_name: String.t(),
           branch: integer,
-          values_def: Tensorflow.ValuesDef.t(),
+          values_def: Tensorflow.ValuesDef.t() | nil,
           nested_contexts: [Tensorflow.ControlFlowContextDef.t()]
         }
   defstruct [
@@ -74,9 +72,7 @@ defmodule Tensorflow.CondContextDef do
   field(:branch, 4, type: :int32)
   field(:values_def, 5, type: Tensorflow.ValuesDef)
 
-  field(
-    :nested_contexts,
-    6,
+  field(:nested_contexts, 6,
     repeated: true,
     type: Tensorflow.ControlFlowContextDef
   )
@@ -96,7 +92,7 @@ defmodule Tensorflow.WhileContextDef do
           pivot_for_body_name: String.t(),
           loop_exit_names: [String.t()],
           loop_enter_names: [String.t()],
-          values_def: Tensorflow.ValuesDef.t(),
+          values_def: Tensorflow.ValuesDef.t() | nil,
           maximum_iterations_name: String.t(),
           nested_contexts: [Tensorflow.ControlFlowContextDef.t()]
         }
@@ -127,9 +123,7 @@ defmodule Tensorflow.WhileContextDef do
   field(:values_def, 9, type: Tensorflow.ValuesDef)
   field(:maximum_iterations_name, 11, type: :string)
 
-  field(
-    :nested_contexts,
-    12,
+  field(:nested_contexts, 12,
     repeated: true,
     type: Tensorflow.ControlFlowContextDef
   )

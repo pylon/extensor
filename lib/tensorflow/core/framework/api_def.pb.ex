@@ -1,45 +1,13 @@
-defmodule Tensorflow.ApiDef do
+defmodule Tensorflow.ApiDef.Visibility do
   @moduledoc false
-  use Protobuf, syntax: :proto3
+  use Protobuf, enum: true, syntax: :proto3
 
-  @type t :: %__MODULE__{
-          graph_op_name: String.t(),
-          visibility: integer,
-          endpoint: [Tensorflow.ApiDef.Endpoint.t()],
-          in_arg: [Tensorflow.ApiDef.Arg.t()],
-          out_arg: [Tensorflow.ApiDef.Arg.t()],
-          arg_order: [String.t()],
-          attr: [Tensorflow.ApiDef.Attr.t()],
-          summary: String.t(),
-          description: String.t(),
-          description_prefix: String.t(),
-          description_suffix: String.t()
-        }
-  defstruct [
-    :graph_op_name,
-    :visibility,
-    :endpoint,
-    :in_arg,
-    :out_arg,
-    :arg_order,
-    :attr,
-    :summary,
-    :description,
-    :description_prefix,
-    :description_suffix
-  ]
+  @type t :: integer | :DEFAULT_VISIBILITY | :VISIBLE | :SKIP | :HIDDEN
 
-  field(:graph_op_name, 1, type: :string)
-  field(:visibility, 2, type: Tensorflow.ApiDef.Visibility, enum: true)
-  field(:endpoint, 3, repeated: true, type: Tensorflow.ApiDef.Endpoint)
-  field(:in_arg, 4, repeated: true, type: Tensorflow.ApiDef.Arg)
-  field(:out_arg, 5, repeated: true, type: Tensorflow.ApiDef.Arg)
-  field(:arg_order, 11, repeated: true, type: :string)
-  field(:attr, 6, repeated: true, type: Tensorflow.ApiDef.Attr)
-  field(:summary, 7, type: :string)
-  field(:description, 8, type: :string)
-  field(:description_prefix, 9, type: :string)
-  field(:description_suffix, 10, type: :string)
+  field(:DEFAULT_VISIBILITY, 0)
+  field(:VISIBLE, 1)
+  field(:SKIP, 2)
+  field(:HIDDEN, 3)
 end
 
 defmodule Tensorflow.ApiDef.Endpoint do
@@ -48,12 +16,14 @@ defmodule Tensorflow.ApiDef.Endpoint do
 
   @type t :: %__MODULE__{
           name: String.t(),
-          deprecation_message: String.t()
+          deprecated: boolean,
+          deprecation_version: integer
         }
-  defstruct [:name, :deprecation_message]
+  defstruct [:name, :deprecated, :deprecation_version]
 
   field(:name, 1, type: :string)
-  field(:deprecation_message, 2, type: :string)
+  field(:deprecated, 3, type: :bool)
+  field(:deprecation_version, 4, type: :int32)
 end
 
 defmodule Tensorflow.ApiDef.Arg do
@@ -79,7 +49,7 @@ defmodule Tensorflow.ApiDef.Attr do
   @type t :: %__MODULE__{
           name: String.t(),
           rename_to: String.t(),
-          default_value: Tensorflow.AttrValue.t(),
+          default_value: Tensorflow.AttrValue.t() | nil,
           description: String.t()
         }
   defstruct [:name, :rename_to, :default_value, :description]
@@ -90,14 +60,54 @@ defmodule Tensorflow.ApiDef.Attr do
   field(:description, 4, type: :string)
 end
 
-defmodule Tensorflow.ApiDef.Visibility do
+defmodule Tensorflow.ApiDef do
   @moduledoc false
-  use Protobuf, enum: true, syntax: :proto3
+  use Protobuf, syntax: :proto3
 
-  field(:DEFAULT_VISIBILITY, 0)
-  field(:VISIBLE, 1)
-  field(:SKIP, 2)
-  field(:HIDDEN, 3)
+  @type t :: %__MODULE__{
+          graph_op_name: String.t(),
+          deprecation_message: String.t(),
+          deprecation_version: integer,
+          visibility: Tensorflow.ApiDef.Visibility.t(),
+          endpoint: [Tensorflow.ApiDef.Endpoint.t()],
+          in_arg: [Tensorflow.ApiDef.Arg.t()],
+          out_arg: [Tensorflow.ApiDef.Arg.t()],
+          arg_order: [String.t()],
+          attr: [Tensorflow.ApiDef.Attr.t()],
+          summary: String.t(),
+          description: String.t(),
+          description_prefix: String.t(),
+          description_suffix: String.t()
+        }
+  defstruct [
+    :graph_op_name,
+    :deprecation_message,
+    :deprecation_version,
+    :visibility,
+    :endpoint,
+    :in_arg,
+    :out_arg,
+    :arg_order,
+    :attr,
+    :summary,
+    :description,
+    :description_prefix,
+    :description_suffix
+  ]
+
+  field(:graph_op_name, 1, type: :string)
+  field(:deprecation_message, 12, type: :string)
+  field(:deprecation_version, 13, type: :int32)
+  field(:visibility, 2, type: Tensorflow.ApiDef.Visibility, enum: true)
+  field(:endpoint, 3, repeated: true, type: Tensorflow.ApiDef.Endpoint)
+  field(:in_arg, 4, repeated: true, type: Tensorflow.ApiDef.Arg)
+  field(:out_arg, 5, repeated: true, type: Tensorflow.ApiDef.Arg)
+  field(:arg_order, 11, repeated: true, type: :string)
+  field(:attr, 6, repeated: true, type: Tensorflow.ApiDef.Attr)
+  field(:summary, 7, type: :string)
+  field(:description, 8, type: :string)
+  field(:description_prefix, 9, type: :string)
+  field(:description_suffix, 10, type: :string)
 end
 
 defmodule Tensorflow.ApiDefs do

@@ -6,7 +6,7 @@ defmodule Tensorflow.ReaderBaseState do
           work_started: integer,
           work_finished: integer,
           num_records_produced: integer,
-          current_work: String.t()
+          current_work: binary
         }
   defstruct [
     :work_started,

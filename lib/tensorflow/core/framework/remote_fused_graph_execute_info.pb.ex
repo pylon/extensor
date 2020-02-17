@@ -1,13 +1,27 @@
+defmodule Tensorflow.RemoteFusedGraphExecuteInfo.TensorShapeTypeProto do
+  @moduledoc false
+  use Protobuf, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          dtype: Tensorflow.DataType.t(),
+          shape: Tensorflow.TensorShapeProto.t() | nil
+        }
+  defstruct [:dtype, :shape]
+
+  field(:dtype, 1, type: Tensorflow.DataType, enum: true)
+  field(:shape, 2, type: Tensorflow.TensorShapeProto)
+end
+
 defmodule Tensorflow.RemoteFusedGraphExecuteInfo do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
-          remote_graph: Tensorflow.GraphDef.t(),
+          remote_graph: Tensorflow.GraphDef.t() | nil,
           graph_input_node_name: [String.t()],
           graph_output_node_name: [String.t()],
           executor_name: String.t(),
-          serialized_executor_parameters: String.t(),
+          serialized_executor_parameters: binary,
           default_graph_input_tensor_shape: [
             Tensorflow.RemoteFusedGraphExecuteInfo.TensorShapeTypeProto.t()
           ],
@@ -31,31 +45,13 @@ defmodule Tensorflow.RemoteFusedGraphExecuteInfo do
   field(:executor_name, 4, type: :string)
   field(:serialized_executor_parameters, 5, type: :bytes)
 
-  field(
-    :default_graph_input_tensor_shape,
-    6,
+  field(:default_graph_input_tensor_shape, 6,
     repeated: true,
     type: Tensorflow.RemoteFusedGraphExecuteInfo.TensorShapeTypeProto
   )
 
-  field(
-    :default_graph_output_tensor_shape,
-    7,
+  field(:default_graph_output_tensor_shape, 7,
     repeated: true,
     type: Tensorflow.RemoteFusedGraphExecuteInfo.TensorShapeTypeProto
   )
-end
-
-defmodule Tensorflow.RemoteFusedGraphExecuteInfo.TensorShapeTypeProto do
-  @moduledoc false
-  use Protobuf, syntax: :proto3
-
-  @type t :: %__MODULE__{
-          dtype: integer,
-          shape: Tensorflow.TensorShapeProto.t()
-        }
-  defstruct [:dtype, :shape]
-
-  field(:dtype, 1, type: Tensorflow.DataType, enum: true)
-  field(:shape, 2, type: Tensorflow.TensorShapeProto)
 end

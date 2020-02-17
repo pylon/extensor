@@ -1,19 +1,27 @@
+defmodule Tensorflow.BundleHeaderProto.Endianness do
+  @moduledoc false
+  use Protobuf, enum: true, syntax: :proto3
+
+  @type t :: integer | :LITTLE | :BIG
+
+  field(:LITTLE, 0)
+  field(:BIG, 1)
+end
+
 defmodule Tensorflow.BundleHeaderProto do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
           num_shards: integer,
-          endianness: integer,
-          version: Tensorflow.VersionDef.t()
+          endianness: Tensorflow.BundleHeaderProto.Endianness.t(),
+          version: Tensorflow.VersionDef.t() | nil
         }
   defstruct [:num_shards, :endianness, :version]
 
   field(:num_shards, 1, type: :int32)
 
-  field(
-    :endianness,
-    2,
+  field(:endianness, 2,
     type: Tensorflow.BundleHeaderProto.Endianness,
     enum: true
   )
@@ -21,21 +29,13 @@ defmodule Tensorflow.BundleHeaderProto do
   field(:version, 3, type: Tensorflow.VersionDef)
 end
 
-defmodule Tensorflow.BundleHeaderProto.Endianness do
-  @moduledoc false
-  use Protobuf, enum: true, syntax: :proto3
-
-  field(:LITTLE, 0)
-  field(:BIG, 1)
-end
-
 defmodule Tensorflow.BundleEntryProto do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
-          dtype: integer,
-          shape: Tensorflow.TensorShapeProto.t(),
+          dtype: Tensorflow.DataType.t(),
+          shape: Tensorflow.TensorShapeProto.t() | nil,
           shard_id: integer,
           offset: integer,
           size: integer,

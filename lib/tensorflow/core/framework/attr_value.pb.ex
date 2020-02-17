@@ -1,3 +1,36 @@
+defmodule Tensorflow.AttrValue.ListValue do
+  @moduledoc false
+  use Protobuf, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          s: [binary],
+          i: [integer],
+          f: [float | :infinity | :negative_infinity | :nan],
+          b: [boolean],
+          type: [[Tensorflow.DataType.t()]],
+          shape: [Tensorflow.TensorShapeProto.t()],
+          tensor: [Tensorflow.TensorProto.t()],
+          func: [Tensorflow.NameAttrList.t()]
+        }
+  defstruct [:s, :i, :f, :b, :type, :shape, :tensor, :func]
+
+  field(:s, 2, repeated: true, type: :bytes)
+  field(:i, 3, repeated: true, type: :int64, packed: true)
+  field(:f, 4, repeated: true, type: :float, packed: true)
+  field(:b, 5, repeated: true, type: :bool, packed: true)
+
+  field(:type, 6,
+    repeated: true,
+    type: Tensorflow.DataType,
+    enum: true,
+    packed: true
+  )
+
+  field(:shape, 7, repeated: true, type: Tensorflow.TensorShapeProto)
+  field(:tensor, 8, repeated: true, type: Tensorflow.TensorProto)
+  field(:func, 9, repeated: true, type: Tensorflow.NameAttrList)
+end
+
 defmodule Tensorflow.AttrValue do
   @moduledoc false
   use Protobuf, syntax: :proto3
@@ -20,39 +53,18 @@ defmodule Tensorflow.AttrValue do
   field(:placeholder, 9, type: :string, oneof: 0)
 end
 
-defmodule Tensorflow.AttrValue.ListValue do
+defmodule Tensorflow.NameAttrList.AttrEntry do
   @moduledoc false
-  use Protobuf, syntax: :proto3
+  use Protobuf, map: true, syntax: :proto3
 
   @type t :: %__MODULE__{
-          s: [String.t()],
-          i: [integer],
-          f: [float],
-          b: [boolean],
-          type: [integer],
-          shape: [Tensorflow.TensorShapeProto.t()],
-          tensor: [Tensorflow.TensorProto.t()],
-          func: [Tensorflow.NameAttrList.t()]
+          key: String.t(),
+          value: Tensorflow.AttrValue.t() | nil
         }
-  defstruct [:s, :i, :f, :b, :type, :shape, :tensor, :func]
+  defstruct [:key, :value]
 
-  field(:s, 2, repeated: true, type: :bytes)
-  field(:i, 3, repeated: true, type: :int64, packed: true)
-  field(:f, 4, repeated: true, type: :float, packed: true)
-  field(:b, 5, repeated: true, type: :bool, packed: true)
-
-  field(
-    :type,
-    6,
-    repeated: true,
-    type: Tensorflow.DataType,
-    enum: true,
-    packed: true
-  )
-
-  field(:shape, 7, repeated: true, type: Tensorflow.TensorShapeProto)
-  field(:tensor, 8, repeated: true, type: Tensorflow.TensorProto)
-  field(:func, 9, repeated: true, type: Tensorflow.NameAttrList)
+  field(:key, 1, type: :string)
+  field(:value, 2, type: Tensorflow.AttrValue)
 end
 
 defmodule Tensorflow.NameAttrList do
@@ -61,31 +73,15 @@ defmodule Tensorflow.NameAttrList do
 
   @type t :: %__MODULE__{
           name: String.t(),
-          attr: %{String.t() => Tensorflow.AttrValue.t()}
+          attr: %{String.t() => Tensorflow.AttrValue.t() | nil}
         }
   defstruct [:name, :attr]
 
   field(:name, 1, type: :string)
 
-  field(
-    :attr,
-    2,
+  field(:attr, 2,
     repeated: true,
     type: Tensorflow.NameAttrList.AttrEntry,
     map: true
   )
-end
-
-defmodule Tensorflow.NameAttrList.AttrEntry do
-  @moduledoc false
-  use Protobuf, map: true, syntax: :proto3
-
-  @type t :: %__MODULE__{
-          key: String.t(),
-          value: Tensorflow.AttrValue.t()
-        }
-  defstruct [:key, :value]
-
-  field(:key, 1, type: :string)
-  field(:value, 2, type: Tensorflow.AttrValue)
 end

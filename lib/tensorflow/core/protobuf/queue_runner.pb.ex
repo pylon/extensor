@@ -7,7 +7,7 @@ defmodule Tensorflow.QueueRunnerDef do
           enqueue_op_name: [String.t()],
           close_op_name: String.t(),
           cancel_op_name: String.t(),
-          queue_closed_exception_types: [integer]
+          queue_closed_exception_types: [[Tensorflow.Error.Code.t()]]
         }
   defstruct [
     :queue_name,
@@ -22,9 +22,7 @@ defmodule Tensorflow.QueueRunnerDef do
   field(:close_op_name, 3, type: :string)
   field(:cancel_op_name, 4, type: :string)
 
-  field(
-    :queue_closed_exception_types,
-    5,
+  field(:queue_closed_exception_types, 5,
     repeated: true,
     type: Tensorflow.Error.Code,
     enum: true

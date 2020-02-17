@@ -4,7 +4,7 @@ defmodule Tensorflow.NamedTensorProto do
 
   @type t :: %__MODULE__{
           name: String.t(),
-          tensor: Tensorflow.TensorProto.t()
+          tensor: Tensorflow.TensorProto.t() | nil
         }
   defstruct [:name, :tensor]
 

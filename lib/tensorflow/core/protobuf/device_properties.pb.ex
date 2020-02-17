@@ -1,3 +1,17 @@
+defmodule Tensorflow.DeviceProperties.EnvironmentEntry do
+  @moduledoc false
+  use Protobuf, map: true, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          key: String.t(),
+          value: String.t()
+        }
+  defstruct [:key, :value]
+
+  field(:key, 1, type: :string)
+  field(:value, 2, type: :string)
+end
+
 defmodule Tensorflow.DeviceProperties do
   @moduledoc false
   use Protobuf, syntax: :proto3
@@ -39,9 +53,7 @@ defmodule Tensorflow.DeviceProperties do
   field(:frequency, 4, type: :int64)
   field(:num_cores, 5, type: :int64)
 
-  field(
-    :environment,
-    6,
+  field(:environment, 6,
     repeated: true,
     type: Tensorflow.DeviceProperties.EnvironmentEntry,
     map: true
@@ -56,27 +68,13 @@ defmodule Tensorflow.DeviceProperties do
   field(:bandwidth, 13, type: :int64)
 end
 
-defmodule Tensorflow.DeviceProperties.EnvironmentEntry do
-  @moduledoc false
-  use Protobuf, map: true, syntax: :proto3
-
-  @type t :: %__MODULE__{
-          key: String.t(),
-          value: String.t()
-        }
-  defstruct [:key, :value]
-
-  field(:key, 1, type: :string)
-  field(:value, 2, type: :string)
-end
-
 defmodule Tensorflow.NamedDevice do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
           name: String.t(),
-          properties: Tensorflow.DeviceProperties.t()
+          properties: Tensorflow.DeviceProperties.t() | nil
         }
   defstruct [:name, :properties]
 

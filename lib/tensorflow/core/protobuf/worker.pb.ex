@@ -2,6 +2,7 @@ defmodule Tensorflow.GetStatusRequest do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
+  @type t :: %__MODULE__{}
   defstruct []
 end
 
@@ -14,9 +15,7 @@ defmodule Tensorflow.GetStatusResponse do
         }
   defstruct [:device_attributes]
 
-  field(
-    :device_attributes,
-    1,
+  field(:device_attributes, 1,
     repeated: true,
     type: Tensorflow.DeviceAttributes
   )
@@ -28,20 +27,32 @@ defmodule Tensorflow.CreateWorkerSessionRequest do
 
   @type t :: %__MODULE__{
           session_handle: String.t(),
-          server_def: Tensorflow.ServerDef.t(),
-          isolate_session_state: boolean
+          server_def: Tensorflow.ServerDef.t() | nil,
+          isolate_session_state: boolean,
+          cluster_device_attributes: [Tensorflow.DeviceAttributes.t()]
         }
-  defstruct [:session_handle, :server_def, :isolate_session_state]
+  defstruct [
+    :session_handle,
+    :server_def,
+    :isolate_session_state,
+    :cluster_device_attributes
+  ]
 
   field(:session_handle, 1, type: :string)
   field(:server_def, 2, type: Tensorflow.ServerDef)
   field(:isolate_session_state, 3, type: :bool)
+
+  field(:cluster_device_attributes, 4,
+    repeated: true,
+    type: Tensorflow.DeviceAttributes
+  )
 end
 
 defmodule Tensorflow.CreateWorkerSessionResponse do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
+  @type t :: %__MODULE__{}
   defstruct []
 end
 
@@ -61,6 +72,7 @@ defmodule Tensorflow.DeleteWorkerSessionResponse do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
+  @type t :: %__MODULE__{}
   defstruct []
 end
 
@@ -71,11 +83,12 @@ defmodule Tensorflow.RegisterGraphRequest do
   @type t :: %__MODULE__{
           session_handle: String.t(),
           create_worker_session_called: boolean,
-          graph_def: Tensorflow.GraphDef.t(),
+          graph_def: Tensorflow.GraphDef.t() | nil,
           has_control_flow: boolean,
-          graph_options: Tensorflow.GraphOptions.t(),
-          debug_options: Tensorflow.DebugOptions.t(),
-          collective_graph_key: integer
+          graph_options: Tensorflow.GraphOptions.t() | nil,
+          debug_options: Tensorflow.DebugOptions.t() | nil,
+          collective_graph_key: integer,
+          config_proto: Tensorflow.ConfigProto.t() | nil
         }
   defstruct [
     :session_handle,
@@ -84,7 +97,8 @@ defmodule Tensorflow.RegisterGraphRequest do
     :has_control_flow,
     :graph_options,
     :debug_options,
-    :collective_graph_key
+    :collective_graph_key,
+    :config_proto
   ]
 
   field(:session_handle, 1, type: :string)
@@ -94,6 +108,7 @@ defmodule Tensorflow.RegisterGraphRequest do
   field(:graph_options, 4, type: Tensorflow.GraphOptions)
   field(:debug_options, 5, type: Tensorflow.DebugOptions)
   field(:collective_graph_key, 7, type: :int64)
+  field(:config_proto, 8, type: Tensorflow.ConfigProto)
 end
 
 defmodule Tensorflow.RegisterGraphResponse do
@@ -128,6 +143,7 @@ defmodule Tensorflow.DeregisterGraphResponse do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
+  @type t :: %__MODULE__{}
   defstruct []
 end
 
@@ -147,6 +163,7 @@ defmodule Tensorflow.CleanupAllResponse do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
+  @type t :: %__MODULE__{}
   defstruct []
 end
 
@@ -182,12 +199,13 @@ defmodule Tensorflow.RunGraphRequest do
           create_worker_session_called: boolean,
           graph_handle: String.t(),
           step_id: integer,
-          exec_opts: Tensorflow.ExecutorOpts.t(),
+          exec_opts: Tensorflow.ExecutorOpts.t() | nil,
           send: [Tensorflow.NamedTensorProto.t()],
           recv_key: [String.t()],
           is_partial: boolean,
           is_last_partial_run: boolean,
-          store_errors_in_response_body: boolean
+          store_errors_in_response_body: boolean,
+          request_id: integer
         }
   defstruct [
     :session_handle,
@@ -199,7 +217,8 @@ defmodule Tensorflow.RunGraphRequest do
     :recv_key,
     :is_partial,
     :is_last_partial_run,
-    :store_errors_in_response_body
+    :store_errors_in_response_body,
+    :request_id
   ]
 
   field(:session_handle, 8, type: :string)
@@ -212,6 +231,7 @@ defmodule Tensorflow.RunGraphRequest do
   field(:is_partial, 6, type: :bool)
   field(:is_last_partial_run, 7, type: :bool)
   field(:store_errors_in_response_body, 9, type: :bool)
+  field(:request_id, 11, type: :int64)
 end
 
 defmodule Tensorflow.RunGraphResponse do
@@ -220,10 +240,10 @@ defmodule Tensorflow.RunGraphResponse do
 
   @type t :: %__MODULE__{
           recv: [Tensorflow.NamedTensorProto.t()],
-          step_stats: Tensorflow.StepStats.t(),
-          cost_graph: Tensorflow.CostGraphDef.t(),
+          step_stats: Tensorflow.StepStats.t() | nil,
+          cost_graph: Tensorflow.CostGraphDef.t() | nil,
           partition_graph: [Tensorflow.GraphDef.t()],
-          status_code: integer,
+          status_code: Tensorflow.Error.Code.t(),
           status_error_message: String.t()
         }
   defstruct [
@@ -259,6 +279,7 @@ defmodule Tensorflow.CleanupGraphResponse do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
+  @type t :: %__MODULE__{}
   defstruct []
 end
 
@@ -270,9 +291,9 @@ defmodule Tensorflow.RecvTensorRequest do
           step_id: integer,
           rendezvous_key: String.t(),
           dma_ok: boolean,
-          client_locality: Tensorflow.DeviceLocality.t(),
-          server_locality: Tensorflow.DeviceLocality.t(),
-          transport_options: Google.Protobuf.Any.t(),
+          client_locality: Tensorflow.DeviceLocality.t() | nil,
+          server_locality: Tensorflow.DeviceLocality.t() | nil,
+          transport_options: Google.Protobuf.Any.t() | nil,
           request_id: integer
         }
   defstruct [
@@ -299,17 +320,45 @@ defmodule Tensorflow.RecvTensorResponse do
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
-          tensor: Tensorflow.TensorProto.t(),
+          tensor: Tensorflow.TensorProto.t() | nil,
           is_dead: boolean,
           send_start_micros: integer,
-          transport_options: Google.Protobuf.Any.t()
+          transport_options: Google.Protobuf.Any.t() | nil,
+          require_ack: boolean
         }
-  defstruct [:tensor, :is_dead, :send_start_micros, :transport_options]
+  defstruct [
+    :tensor,
+    :is_dead,
+    :send_start_micros,
+    :transport_options,
+    :require_ack
+  ]
 
   field(:tensor, 1, type: Tensorflow.TensorProto)
   field(:is_dead, 2, type: :bool)
   field(:send_start_micros, 3, type: :int64)
   field(:transport_options, 4, type: Google.Protobuf.Any)
+  field(:require_ack, 5, type: :bool)
+end
+
+defmodule Tensorflow.MarkRecvFinishedRequest do
+  @moduledoc false
+  use Protobuf, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          request_id: integer
+        }
+  defstruct [:request_id]
+
+  field(:request_id, 1, type: :int64)
+end
+
+defmodule Tensorflow.MarkRecvFinishedResponse do
+  @moduledoc false
+  use Protobuf, syntax: :proto3
+
+  @type t :: %__MODULE__{}
+  defstruct []
 end
 
 defmodule Tensorflow.LoggingRequest do
@@ -341,7 +390,7 @@ defmodule Tensorflow.LabeledStepStats do
 
   @type t :: %__MODULE__{
           step_id: integer,
-          step_stats: Tensorflow.StepStats.t()
+          step_stats: Tensorflow.StepStats.t() | nil
         }
   defstruct [:step_id, :step_stats]
 
@@ -366,7 +415,7 @@ defmodule Tensorflow.TraceOpts do
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
-          duration: float,
+          duration: float | :infinity | :negative_infinity | :nan,
           use_step_profiler: boolean,
           use_kernel_profiler: boolean,
           use_extended_profiler: boolean,
@@ -395,7 +444,7 @@ defmodule Tensorflow.TracingRequest do
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
-          options: Tensorflow.TraceOpts.t()
+          options: Tensorflow.TraceOpts.t() | nil
         }
   defstruct [:options]
 
@@ -406,6 +455,7 @@ defmodule Tensorflow.TracingResponse do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
+  @type t :: %__MODULE__{}
   defstruct []
 end
 
@@ -418,11 +468,13 @@ defmodule Tensorflow.RecvBufRequest do
           buf_rendezvous_key: String.t(),
           num_bytes: integer,
           buf_ptr: non_neg_integer,
-          client_locality: Tensorflow.DeviceLocality.t(),
-          server_locality: Tensorflow.DeviceLocality.t(),
-          transport_options: Google.Protobuf.Any.t(),
+          client_locality: Tensorflow.DeviceLocality.t() | nil,
+          server_locality: Tensorflow.DeviceLocality.t() | nil,
+          transport_options: Google.Protobuf.Any.t() | nil,
           src_device: String.t(),
-          dst_device: String.t()
+          dst_device: String.t(),
+          request_id: integer,
+          src_incarnation: non_neg_integer
         }
   defstruct [
     :step_id,
@@ -433,7 +485,9 @@ defmodule Tensorflow.RecvBufRequest do
     :server_locality,
     :transport_options,
     :src_device,
-    :dst_device
+    :dst_device,
+    :request_id,
+    :src_incarnation
   ]
 
   field(:step_id, 1, type: :int64)
@@ -445,6 +499,8 @@ defmodule Tensorflow.RecvBufRequest do
   field(:transport_options, 7, type: Google.Protobuf.Any)
   field(:src_device, 8, type: :string)
   field(:dst_device, 9, type: :string)
+  field(:request_id, 10, type: :int64)
+  field(:src_incarnation, 11, type: :uint64)
 end
 
 defmodule Tensorflow.RecvBufResponse do
@@ -455,15 +511,17 @@ defmodule Tensorflow.RecvBufResponse do
           buf_ptr: non_neg_integer,
           num_bytes: integer,
           is_dead: boolean,
-          transport_options: Google.Protobuf.Any.t(),
-          send_start_micros: integer
+          transport_options: Google.Protobuf.Any.t() | nil,
+          send_start_micros: integer,
+          require_ack: boolean
         }
   defstruct [
     :buf_ptr,
     :num_bytes,
     :is_dead,
     :transport_options,
-    :send_start_micros
+    :send_start_micros,
+    :require_ack
   ]
 
   field(:buf_ptr, 1, type: :fixed64)
@@ -471,6 +529,7 @@ defmodule Tensorflow.RecvBufResponse do
   field(:is_dead, 3, type: :bool)
   field(:transport_options, 4, type: Google.Protobuf.Any)
   field(:send_start_micros, 5, type: :int64)
+  field(:require_ack, 6, type: :bool)
 end
 
 defmodule Tensorflow.CompleteGroupRequest do
@@ -481,14 +540,22 @@ defmodule Tensorflow.CompleteGroupRequest do
           group_key: integer,
           group_size: integer,
           device_type: String.t(),
-          device_name: [String.t()]
+          device_name: [String.t()],
+          collective_type: integer
         }
-  defstruct [:group_key, :group_size, :device_type, :device_name]
+  defstruct [
+    :group_key,
+    :group_size,
+    :device_type,
+    :device_name,
+    :collective_type
+  ]
 
   field(:group_key, 1, type: :int32)
   field(:group_size, 2, type: :int32)
   field(:device_type, 3, type: :string)
   field(:device_name, 4, repeated: true, type: :string)
+  field(:collective_type, 5, type: :int32)
 end
 
 defmodule Tensorflow.CompleteGroupResponse do
@@ -501,7 +568,8 @@ defmodule Tensorflow.CompleteGroupResponse do
           device_type: String.t(),
           num_tasks: integer,
           device_name: [String.t()],
-          task_name: [String.t()]
+          task_name: [String.t()],
+          communicator_key: binary
         }
   defstruct [
     :group_key,
@@ -509,7 +577,8 @@ defmodule Tensorflow.CompleteGroupResponse do
     :device_type,
     :num_tasks,
     :device_name,
-    :task_name
+    :task_name,
+    :communicator_key
   ]
 
   field(:group_key, 1, type: :int32)
@@ -518,6 +587,7 @@ defmodule Tensorflow.CompleteGroupResponse do
   field(:num_tasks, 4, type: :int32)
   field(:device_name, 5, repeated: true, type: :string)
   field(:task_name, 6, repeated: true, type: :string)
+  field(:communicator_key, 7, type: :bytes)
 end
 
 defmodule Tensorflow.CompleteInstanceRequest do
@@ -527,8 +597,8 @@ defmodule Tensorflow.CompleteInstanceRequest do
   @type t :: %__MODULE__{
           name: String.t(),
           type: integer,
-          data_type: integer,
-          shape: Tensorflow.TensorShapeProto.t(),
+          data_type: Tensorflow.DataType.t(),
+          shape: Tensorflow.TensorShapeProto.t() | nil,
           group_key: integer,
           group_size: integer,
           instance_key: integer,
