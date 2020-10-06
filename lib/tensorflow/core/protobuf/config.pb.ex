@@ -20,6 +20,21 @@ defmodule Tensorflow.OptimizerOptions.GlobalJitLevel do
   field(:ON_2, 2)
 end
 
+defmodule Tensorflow.ConfigProto.Experimental.MlirBridgeRollout do
+  @moduledoc false
+  use Protobuf, enum: true, syntax: :proto3
+
+  @type t ::
+          integer
+          | :MLIR_BRIDGE_ROLLOUT_UNSPECIFIED
+          | :MLIR_BRIDGE_ROLLOUT_ENABLED
+          | :MLIR_BRIDGE_ROLLOUT_DISABLED
+
+  field(:MLIR_BRIDGE_ROLLOUT_UNSPECIFIED, 0)
+  field(:MLIR_BRIDGE_ROLLOUT_ENABLED, 1)
+  field(:MLIR_BRIDGE_ROLLOUT_DISABLED, 2)
+end
+
 defmodule Tensorflow.RunOptions.TraceLevel do
   @moduledoc false
   use Protobuf, enum: true, syntax: :proto3
@@ -42,11 +57,13 @@ defmodule Tensorflow.GPUOptions.Experimental.VirtualDevices do
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
-          memory_limit_mb: [float | :infinity | :negative_infinity | :nan]
+          memory_limit_mb: [float | :infinity | :negative_infinity | :nan],
+          priority: [integer]
         }
-  defstruct [:memory_limit_mb]
+  defstruct [:memory_limit_mb, :priority]
 
   field(:memory_limit_mb, 1, repeated: true, type: :float)
+  field(:priority, 2, repeated: true, type: :int32)
 end
 
 defmodule Tensorflow.GPUOptions.Experimental do
@@ -285,6 +302,9 @@ defmodule Tensorflow.ConfigProto.Experimental do
           session_metadata: Tensorflow.SessionMetadata.t() | nil,
           optimize_for_static_graph: boolean,
           enable_mlir_bridge: boolean,
+          mlir_bridge_rollout:
+            Tensorflow.ConfigProto.Experimental.MlirBridgeRollout.t(),
+          enable_mlir_graph_optimization: boolean,
           disable_output_partition_graphs: boolean,
           xla_fusion_autotuner_thresh: integer
         }
@@ -301,6 +321,8 @@ defmodule Tensorflow.ConfigProto.Experimental do
     :session_metadata,
     :optimize_for_static_graph,
     :enable_mlir_bridge,
+    :mlir_bridge_rollout,
+    :enable_mlir_graph_optimization,
     :disable_output_partition_graphs,
     :xla_fusion_autotuner_thresh
   ]
@@ -317,6 +339,13 @@ defmodule Tensorflow.ConfigProto.Experimental do
   field(:session_metadata, 11, type: Tensorflow.SessionMetadata)
   field(:optimize_for_static_graph, 12, type: :bool)
   field(:enable_mlir_bridge, 13, type: :bool)
+
+  field(:mlir_bridge_rollout, 17,
+    type: Tensorflow.ConfigProto.Experimental.MlirBridgeRollout,
+    enum: true
+  )
+
+  field(:enable_mlir_graph_optimization, 16, type: :bool)
   field(:disable_output_partition_graphs, 14, type: :bool)
   field(:xla_fusion_autotuner_thresh, 15, type: :int64)
 end
@@ -393,18 +422,40 @@ defmodule Tensorflow.ConfigProto do
   field(:experimental, 16, type: Tensorflow.ConfigProto.Experimental)
 end
 
+defmodule Tensorflow.RunOptions.Experimental.RunHandlerPoolOptions do
+  @moduledoc false
+  use Protobuf, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          priority: integer
+        }
+  defstruct [:priority]
+
+  field(:priority, 1, type: :int64)
+end
+
 defmodule Tensorflow.RunOptions.Experimental do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
           collective_graph_key: integer,
-          use_run_handler_pool: boolean
+          use_run_handler_pool: boolean,
+          run_handler_pool_options:
+            Tensorflow.RunOptions.Experimental.RunHandlerPoolOptions.t() | nil
         }
-  defstruct [:collective_graph_key, :use_run_handler_pool]
+  defstruct [
+    :collective_graph_key,
+    :use_run_handler_pool,
+    :run_handler_pool_options
+  ]
 
   field(:collective_graph_key, 1, type: :int64)
   field(:use_run_handler_pool, 2, type: :bool)
+
+  field(:run_handler_pool_options, 3,
+    type: Tensorflow.RunOptions.Experimental.RunHandlerPoolOptions
+  )
 end
 
 defmodule Tensorflow.RunOptions do

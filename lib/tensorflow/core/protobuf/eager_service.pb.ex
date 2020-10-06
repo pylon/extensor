@@ -1,3 +1,19 @@
+defmodule Tensorflow.Eager.Operation.Input do
+  @moduledoc false
+  use Protobuf, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          item: {atom, any}
+        }
+  defstruct [:item]
+
+  oneof(:item, 0)
+
+  field(:remote_handle, 1, type: Tensorflow.Eager.RemoteTensorHandle, oneof: 0)
+
+  field(:tensor, 2, type: Tensorflow.TensorProto, oneof: 0)
+end
+
 defmodule Tensorflow.Eager.Operation.AttrsEntry do
   @moduledoc false
   use Protobuf, map: true, syntax: :proto3
@@ -19,7 +35,7 @@ defmodule Tensorflow.Eager.Operation do
   @type t :: %__MODULE__{
           id: integer,
           name: String.t(),
-          inputs: [Tensorflow.Eager.RemoteTensorHandle.t()],
+          op_inputs: [Tensorflow.Eager.Operation.Input.t()],
           control_op_ids: [integer],
           attrs: %{String.t() => Tensorflow.AttrValue.t() | nil},
           device: String.t(),
@@ -30,7 +46,7 @@ defmodule Tensorflow.Eager.Operation do
   defstruct [
     :id,
     :name,
-    :inputs,
+    :op_inputs,
     :control_op_ids,
     :attrs,
     :device,
@@ -41,7 +57,9 @@ defmodule Tensorflow.Eager.Operation do
 
   field(:id, 1, type: :int64)
   field(:name, 2, type: :string)
-  field(:inputs, 3, repeated: true, type: Tensorflow.Eager.RemoteTensorHandle)
+
+  field(:op_inputs, 10, repeated: true, type: Tensorflow.Eager.Operation.Input)
+
   field(:control_op_ids, 4, repeated: true, type: :int64)
 
   field(:attrs, 5,
@@ -85,8 +103,13 @@ defmodule Tensorflow.Eager.QueueItem do
     oneof: 0
   )
 
-  field(:clear_remote_executor_for_stream, 6,
-    type: Tensorflow.Eager.ClearRemoteExecutorForStream,
+  field(:sync_remote_executor_for_stream, 6,
+    type: Tensorflow.Eager.SyncRemoteExecutorForStream,
+    oneof: 0
+  )
+
+  field(:send_packed_handle, 7,
+    type: Tensorflow.Eager.SendPackedHandleOp,
     oneof: 0
   )
 end
@@ -96,11 +119,15 @@ defmodule Tensorflow.Eager.QueueResponse do
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
-          shape: [Tensorflow.TensorShapeProto.t()]
+          shape: [Tensorflow.TensorShapeProto.t()],
+          device: [String.t()],
+          tensor: [Tensorflow.TensorProto.t()]
         }
-  defstruct [:shape]
+  defstruct [:shape, :device, :tensor]
 
   field(:shape, 1, repeated: true, type: Tensorflow.TensorShapeProto)
+  field(:device, 3, repeated: true, type: :string)
+  field(:tensor, 2, repeated: true, type: Tensorflow.TensorProto)
 end
 
 defmodule Tensorflow.Eager.CreateContextRequest do
@@ -252,6 +279,36 @@ defmodule Tensorflow.Eager.WaitQueueDoneResponse do
   defstruct []
 end
 
+defmodule Tensorflow.Eager.RunComponentFunctionRequest do
+  @moduledoc false
+  use Protobuf, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          context_id: non_neg_integer,
+          operation: Tensorflow.Eager.Operation.t() | nil,
+          output_num: [integer]
+        }
+  defstruct [:context_id, :operation, :output_num]
+
+  field(:context_id, 1, type: :fixed64)
+  field(:operation, 2, type: Tensorflow.Eager.Operation)
+  field(:output_num, 3, repeated: true, type: :int32)
+end
+
+defmodule Tensorflow.Eager.RunComponentFunctionResponse do
+  @moduledoc false
+  use Protobuf, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          shape: [Tensorflow.TensorShapeProto.t()],
+          tensor: [Tensorflow.TensorProto.t()]
+        }
+  defstruct [:shape, :tensor]
+
+  field(:shape, 1, repeated: true, type: Tensorflow.TensorShapeProto)
+  field(:tensor, 2, repeated: true, type: Tensorflow.TensorProto)
+end
+
 defmodule Tensorflow.Eager.KeepAliveRequest do
   @moduledoc false
   use Protobuf, syntax: :proto3
@@ -326,7 +383,7 @@ defmodule Tensorflow.Eager.CleanupFunctionOp do
   field(:step_id, 1, type: :int64)
 end
 
-defmodule Tensorflow.Eager.ClearRemoteExecutorForStream do
+defmodule Tensorflow.Eager.SyncRemoteExecutorForStream do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
@@ -347,5 +404,59 @@ defmodule Tensorflow.Eager.SendTensorOp do
 
   field(:op_id, 1, type: :int64)
   field(:tensors, 2, repeated: true, type: Tensorflow.TensorProto)
+  field(:device_name, 3, type: :string)
+end
+
+defmodule Tensorflow.Eager.SendPackedHandleOp.LocalTensorHandle do
+  @moduledoc false
+  use Protobuf, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          tensor: Tensorflow.TensorProto.t() | nil,
+          device: String.t()
+        }
+  defstruct [:tensor, :device]
+
+  field(:tensor, 1, type: Tensorflow.TensorProto)
+  field(:device, 2, type: :string)
+end
+
+defmodule Tensorflow.Eager.SendPackedHandleOp.Handle do
+  @moduledoc false
+  use Protobuf, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          item: {atom, any}
+        }
+  defstruct [:item]
+
+  oneof(:item, 0)
+
+  field(:local_handle, 1,
+    type: Tensorflow.Eager.SendPackedHandleOp.LocalTensorHandle,
+    oneof: 0
+  )
+
+  field(:remote_handle, 2, type: Tensorflow.Eager.RemoteTensorHandle, oneof: 0)
+end
+
+defmodule Tensorflow.Eager.SendPackedHandleOp do
+  @moduledoc false
+  use Protobuf, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          op_id: integer,
+          handles: [Tensorflow.Eager.SendPackedHandleOp.Handle.t()],
+          device_name: String.t()
+        }
+  defstruct [:op_id, :handles, :device_name]
+
+  field(:op_id, 1, type: :int64)
+
+  field(:handles, 2,
+    repeated: true,
+    type: Tensorflow.Eager.SendPackedHandleOp.Handle
+  )
+
   field(:device_name, 3, type: :string)
 end

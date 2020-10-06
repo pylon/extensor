@@ -10,6 +10,17 @@ defmodule Tensorflow.RewriterConfig.Toggle do
   field(:AGGRESSIVE, 3)
 end
 
+defmodule Tensorflow.RewriterConfig.CpuLayout do
+  @moduledoc false
+  use Protobuf, enum: true, syntax: :proto3
+
+  @type t :: integer | :NO_CONVERSION_ON_CPU | :NCHW_TO_NHWC | :NHWC_TO_NCHW
+
+  field(:NO_CONVERSION_ON_CPU, 0)
+  field(:NCHW_TO_NHWC, 1)
+  field(:NHWC_TO_NCHW, 2)
+end
+
 defmodule Tensorflow.RewriterConfig.NumIterationsType do
   @moduledoc false
   use Protobuf, enum: true, syntax: :proto3
@@ -108,10 +119,12 @@ defmodule Tensorflow.RewriterConfig do
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
+          cpu_layout_conversion: Tensorflow.RewriterConfig.CpuLayout.t(),
           layout_optimizer: Tensorflow.RewriterConfig.Toggle.t(),
           constant_folding: Tensorflow.RewriterConfig.Toggle.t(),
           shape_optimization: Tensorflow.RewriterConfig.Toggle.t(),
           remapping: Tensorflow.RewriterConfig.Toggle.t(),
+          common_subgraph_elimination: Tensorflow.RewriterConfig.Toggle.t(),
           arithmetic_optimization: Tensorflow.RewriterConfig.Toggle.t(),
           dependency_optimization: Tensorflow.RewriterConfig.Toggle.t(),
           loop_optimization: Tensorflow.RewriterConfig.Toggle.t(),
@@ -122,10 +135,12 @@ defmodule Tensorflow.RewriterConfig do
           pin_to_host_optimization: Tensorflow.RewriterConfig.Toggle.t(),
           implementation_selector: Tensorflow.RewriterConfig.Toggle.t(),
           auto_mixed_precision: Tensorflow.RewriterConfig.Toggle.t(),
+          auto_mixed_precision_mkl: Tensorflow.RewriterConfig.Toggle.t(),
           disable_meta_optimizer: boolean,
           meta_optimizer_iterations:
             Tensorflow.RewriterConfig.NumIterationsType.t(),
           min_graph_nodes: integer,
+          experimental_disable_compressed_tensor_optimization: boolean,
           memory_optimization: Tensorflow.RewriterConfig.MemOptType.t(),
           memory_optimizer_target_node_name_scope: String.t(),
           meta_optimizer_timeout_ms: integer,
@@ -142,10 +157,12 @@ defmodule Tensorflow.RewriterConfig do
             Tensorflow.VerifierConfig.t() | nil
         }
   defstruct [
+    :cpu_layout_conversion,
     :layout_optimizer,
     :constant_folding,
     :shape_optimization,
     :remapping,
+    :common_subgraph_elimination,
     :arithmetic_optimization,
     :dependency_optimization,
     :loop_optimization,
@@ -156,9 +173,11 @@ defmodule Tensorflow.RewriterConfig do
     :pin_to_host_optimization,
     :implementation_selector,
     :auto_mixed_precision,
+    :auto_mixed_precision_mkl,
     :disable_meta_optimizer,
     :meta_optimizer_iterations,
     :min_graph_nodes,
+    :experimental_disable_compressed_tensor_optimization,
     :memory_optimization,
     :memory_optimizer_target_node_name_scope,
     :meta_optimizer_timeout_ms,
@@ -170,6 +189,11 @@ defmodule Tensorflow.RewriterConfig do
     :inter_optimizer_verifier_config,
     :post_optimization_verifier_config
   ]
+
+  field(:cpu_layout_conversion, 50,
+    type: Tensorflow.RewriterConfig.CpuLayout,
+    enum: true
+  )
 
   field(:layout_optimizer, 1,
     type: Tensorflow.RewriterConfig.Toggle,
@@ -187,6 +211,11 @@ defmodule Tensorflow.RewriterConfig do
   )
 
   field(:remapping, 14, type: Tensorflow.RewriterConfig.Toggle, enum: true)
+
+  field(:common_subgraph_elimination, 24,
+    type: Tensorflow.RewriterConfig.Toggle,
+    enum: true
+  )
 
   field(:arithmetic_optimization, 7,
     type: Tensorflow.RewriterConfig.Toggle,
@@ -235,6 +264,11 @@ defmodule Tensorflow.RewriterConfig do
     enum: true
   )
 
+  field(:auto_mixed_precision_mkl, 25,
+    type: Tensorflow.RewriterConfig.Toggle,
+    enum: true
+  )
+
   field(:disable_meta_optimizer, 19, type: :bool)
 
   field(:meta_optimizer_iterations, 12,
@@ -243,6 +277,7 @@ defmodule Tensorflow.RewriterConfig do
   )
 
   field(:min_graph_nodes, 17, type: :int32)
+  field(:experimental_disable_compressed_tensor_optimization, 26, type: :bool)
 
   field(:memory_optimization, 4,
     type: Tensorflow.RewriterConfig.MemOptType,

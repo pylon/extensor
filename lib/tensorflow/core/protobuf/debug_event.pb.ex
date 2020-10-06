@@ -61,12 +61,14 @@ defmodule Tensorflow.DebugMetadata do
 
   @type t :: %__MODULE__{
           tensorflow_version: String.t(),
-          file_version: String.t()
+          file_version: String.t(),
+          tfdbg_run_id: String.t()
         }
-  defstruct [:tensorflow_version, :file_version]
+  defstruct [:tensorflow_version, :file_version, :tfdbg_run_id]
 
   field(:tensorflow_version, 1, type: :string)
   field(:file_version, 2, type: :string)
+  field(:tfdbg_run_id, 3, type: :string)
 end
 
 defmodule Tensorflow.SourceFile do
