@@ -98,14 +98,31 @@ defmodule Tensorflow.CostGraphDef.Node do
   field(:inaccurate, 17, type: :bool)
 end
 
+defmodule Tensorflow.CostGraphDef.AggregatedCost do
+  @moduledoc false
+  use Protobuf, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          cost: float | :infinity | :negative_infinity | :nan,
+          dimension: String.t()
+        }
+  defstruct [:cost, :dimension]
+
+  field(:cost, 1, type: :float)
+  field(:dimension, 2, type: :string)
+end
+
 defmodule Tensorflow.CostGraphDef do
   @moduledoc false
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
-          node: [Tensorflow.CostGraphDef.Node.t()]
+          node: [Tensorflow.CostGraphDef.Node.t()],
+          cost: [Tensorflow.CostGraphDef.AggregatedCost.t()]
         }
-  defstruct [:node]
+  defstruct [:node, :cost]
 
   field(:node, 1, repeated: true, type: Tensorflow.CostGraphDef.Node)
+
+  field(:cost, 2, repeated: true, type: Tensorflow.CostGraphDef.AggregatedCost)
 end

@@ -14,6 +14,8 @@ defmodule Tensorflow.TypeSpecProto.TypeSpecClass do
           | :OPTIONAL_SPEC
           | :PER_REPLICA_SPEC
           | :VARIABLE_SPEC
+          | :ROW_PARTITION_SPEC
+          | :NDARRAY_SPEC
 
   field(:UNKNOWN, 0)
   field(:SPARSE_TENSOR_SPEC, 1)
@@ -25,6 +27,8 @@ defmodule Tensorflow.TypeSpecProto.TypeSpecClass do
   field(:OPTIONAL_SPEC, 7)
   field(:PER_REPLICA_SPEC, 8)
   field(:VARIABLE_SPEC, 9)
+  field(:ROW_PARTITION_SPEC, 10)
+  field(:NDARRAY_SPEC, 11)
 end
 
 defmodule Tensorflow.StructuredValue do
@@ -52,6 +56,12 @@ defmodule Tensorflow.StructuredValue do
 
   field(:tensor_spec_value, 33, type: Tensorflow.TensorSpecProto, oneof: 0)
   field(:type_spec_value, 34, type: Tensorflow.TypeSpecProto, oneof: 0)
+
+  field(:bounded_tensor_spec_value, 35,
+    type: Tensorflow.BoundedTensorSpecProto,
+    oneof: 0
+  )
+
   field(:list_value, 51, type: Tensorflow.ListValue, oneof: 0)
   field(:tuple_value, 52, type: Tensorflow.TupleValue, oneof: 0)
   field(:dict_value, 53, type: Tensorflow.DictValue, oneof: 0)
@@ -162,6 +172,26 @@ defmodule Tensorflow.TensorSpecProto do
   field(:name, 1, type: :string)
   field(:shape, 2, type: Tensorflow.TensorShapeProto)
   field(:dtype, 3, type: Tensorflow.DataType, enum: true)
+end
+
+defmodule Tensorflow.BoundedTensorSpecProto do
+  @moduledoc false
+  use Protobuf, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          name: String.t(),
+          shape: Tensorflow.TensorShapeProto.t() | nil,
+          dtype: Tensorflow.DataType.t(),
+          minimum: Tensorflow.TensorProto.t() | nil,
+          maximum: Tensorflow.TensorProto.t() | nil
+        }
+  defstruct [:name, :shape, :dtype, :minimum, :maximum]
+
+  field(:name, 1, type: :string)
+  field(:shape, 2, type: Tensorflow.TensorShapeProto)
+  field(:dtype, 3, type: Tensorflow.DataType, enum: true)
+  field(:minimum, 4, type: Tensorflow.TensorProto)
+  field(:maximum, 5, type: Tensorflow.TensorProto)
 end
 
 defmodule Tensorflow.TypeSpecProto do

@@ -29,13 +29,17 @@ defmodule Tensorflow.CreateWorkerSessionRequest do
           session_handle: String.t(),
           server_def: Tensorflow.ServerDef.t() | nil,
           isolate_session_state: boolean,
-          cluster_device_attributes: [Tensorflow.DeviceAttributes.t()]
+          cluster_device_attributes: [Tensorflow.DeviceAttributes.t()],
+          master_task: String.t(),
+          master_incarnation: integer
         }
   defstruct [
     :session_handle,
     :server_def,
     :isolate_session_state,
-    :cluster_device_attributes
+    :cluster_device_attributes,
+    :master_task,
+    :master_incarnation
   ]
 
   field(:session_handle, 1, type: :string)
@@ -46,6 +50,9 @@ defmodule Tensorflow.CreateWorkerSessionRequest do
     repeated: true,
     type: Tensorflow.DeviceAttributes
   )
+
+  field(:master_task, 5, type: :string)
+  field(:master_incarnation, 6, type: :int64)
 end
 
 defmodule Tensorflow.CreateWorkerSessionResponse do
@@ -540,22 +547,22 @@ defmodule Tensorflow.CompleteGroupRequest do
           group_key: integer,
           group_size: integer,
           device_type: String.t(),
-          device_name: [String.t()],
-          collective_type: integer
+          collective_type: integer,
+          device_attributes: Tensorflow.DeviceAttributes.t() | nil
         }
   defstruct [
     :group_key,
     :group_size,
     :device_type,
-    :device_name,
-    :collective_type
+    :collective_type,
+    :device_attributes
   ]
 
   field(:group_key, 1, type: :int32)
   field(:group_size, 2, type: :int32)
   field(:device_type, 3, type: :string)
-  field(:device_name, 4, repeated: true, type: :string)
   field(:collective_type, 5, type: :int32)
+  field(:device_attributes, 6, type: Tensorflow.DeviceAttributes)
 end
 
 defmodule Tensorflow.CompleteGroupResponse do
@@ -567,27 +574,28 @@ defmodule Tensorflow.CompleteGroupResponse do
           group_size: integer,
           device_type: String.t(),
           num_tasks: integer,
-          device_name: [String.t()],
-          task_name: [String.t()],
-          communicator_key: binary
+          communicator_key: binary,
+          device_attributes: [Tensorflow.DeviceAttributes.t()]
         }
   defstruct [
     :group_key,
     :group_size,
     :device_type,
     :num_tasks,
-    :device_name,
-    :task_name,
-    :communicator_key
+    :communicator_key,
+    :device_attributes
   ]
 
   field(:group_key, 1, type: :int32)
   field(:group_size, 2, type: :int32)
   field(:device_type, 3, type: :string)
   field(:num_tasks, 4, type: :int32)
-  field(:device_name, 5, repeated: true, type: :string)
-  field(:task_name, 6, repeated: true, type: :string)
   field(:communicator_key, 7, type: :bytes)
+
+  field(:device_attributes, 8,
+    repeated: true,
+    type: Tensorflow.DeviceAttributes
+  )
 end
 
 defmodule Tensorflow.CompleteInstanceRequest do

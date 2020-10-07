@@ -100,3 +100,13 @@ defmodule Tensorflow.DataType do
   field(:DT_UINT32_REF, 122)
   field(:DT_UINT64_REF, 123)
 end
+
+defmodule Tensorflow.SpecializedType do
+  @moduledoc false
+  use Protobuf, enum: true, syntax: :proto3
+
+  @type t :: integer | :ST_INVALID | :ST_TENSOR_LIST
+
+  field(:ST_INVALID, 0)
+  field(:ST_TENSOR_LIST, 1)
+end

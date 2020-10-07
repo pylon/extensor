@@ -21,7 +21,7 @@ The API reference is available [here](https://hexdocs.pm/extensor/).
 ```elixir
 def deps do
   [
-    {:extensor, "~> 2.1"}
+    {:extensor, "~> 2.3"}
   ]
 end
 ```
@@ -29,7 +29,7 @@ end
 ### Dependencies
 This project requires the Tensorflow C headers/libraries. For development,
 these can be installed by following the [official Tensorflow instructions](
-https://www.tensorflow.org/install/install_c).
+https://www.tensorflow.org/install/lang_c).
 
 For docker deployment, see the sample dockerfiles in the docker directory.
 Docker for ubuntu can be tested with the following commands.

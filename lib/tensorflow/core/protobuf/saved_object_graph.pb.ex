@@ -1,3 +1,14 @@
+defmodule Tensorflow.FunctionSpec.ExperimentalCompile do
+  @moduledoc false
+  use Protobuf, enum: true, syntax: :proto3
+
+  @type t :: integer | :DEFAULT | :ON | :OFF
+
+  field(:DEFAULT, 0)
+  field(:ON, 1)
+  field(:OFF, 2)
+end
+
 defmodule Tensorflow.SavedObjectGraph.ConcreteFunctionsEntry do
   @moduledoc false
   use Protobuf, map: true, syntax: :proto3
@@ -33,6 +44,20 @@ defmodule Tensorflow.SavedObjectGraph do
   )
 end
 
+defmodule Tensorflow.SavedObject.SaveableObjectsEntry do
+  @moduledoc false
+  use Protobuf, map: true, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          key: String.t(),
+          value: Tensorflow.SaveableObject.t() | nil
+        }
+  defstruct [:key, :value]
+
+  field(:key, 1, type: :string)
+  field(:value, 2, type: Tensorflow.SaveableObject)
+end
+
 defmodule Tensorflow.SavedObject do
   @moduledoc false
   use Protobuf, syntax: :proto3
@@ -44,9 +69,12 @@ defmodule Tensorflow.SavedObject do
           ],
           slot_variables: [
             Tensorflow.TrackableObjectGraph.TrackableObject.SlotVariableReference.t()
-          ]
+          ],
+          saveable_objects: %{
+            String.t() => Tensorflow.SaveableObject.t() | nil
+          }
         }
-  defstruct [:kind, :children, :slot_variables]
+  defstruct [:kind, :children, :slot_variables, :saveable_objects]
 
   oneof(:kind, 0)
 
@@ -73,6 +101,12 @@ defmodule Tensorflow.SavedObject do
 
   field(:constant, 9, type: Tensorflow.SavedConstant, oneof: 0)
   field(:resource, 10, type: Tensorflow.SavedResource, oneof: 0)
+
+  field(:saveable_objects, 11,
+    repeated: true,
+    type: Tensorflow.SavedObject.SaveableObjectsEntry,
+    map: true
+  )
 end
 
 defmodule Tensorflow.SavedUserObject do
@@ -175,7 +209,11 @@ defmodule Tensorflow.SavedVariable do
           trainable: boolean,
           synchronization: Tensorflow.VariableSynchronization.t(),
           aggregation: Tensorflow.VariableAggregation.t(),
-          name: String.t()
+          name: String.t(),
+          device: String.t(),
+          experimental_distributed_variable_components: [
+            Tensorflow.SavedVariable.t()
+          ]
         }
   defstruct [
     :dtype,
@@ -183,7 +221,9 @@ defmodule Tensorflow.SavedVariable do
     :trainable,
     :synchronization,
     :aggregation,
-    :name
+    :name,
+    :device,
+    :experimental_distributed_variable_components
   ]
 
   field(:dtype, 1, type: Tensorflow.DataType, enum: true)
@@ -197,6 +237,12 @@ defmodule Tensorflow.SavedVariable do
 
   field(:aggregation, 5, type: Tensorflow.VariableAggregation, enum: true)
   field(:name, 6, type: :string)
+  field(:device, 7, type: :string)
+
+  field(:experimental_distributed_variable_components, 8,
+    repeated: true,
+    type: Tensorflow.SavedVariable
+  )
 end
 
 defmodule Tensorflow.FunctionSpec do
@@ -206,13 +252,25 @@ defmodule Tensorflow.FunctionSpec do
   @type t :: %__MODULE__{
           fullargspec: Tensorflow.StructuredValue.t() | nil,
           is_method: boolean,
-          input_signature: Tensorflow.StructuredValue.t() | nil
+          input_signature: Tensorflow.StructuredValue.t() | nil,
+          experimental_compile:
+            Tensorflow.FunctionSpec.ExperimentalCompile.t()
         }
-  defstruct [:fullargspec, :is_method, :input_signature]
+  defstruct [
+    :fullargspec,
+    :is_method,
+    :input_signature,
+    :experimental_compile
+  ]
 
   field(:fullargspec, 1, type: Tensorflow.StructuredValue)
   field(:is_method, 2, type: :bool)
   field(:input_signature, 5, type: Tensorflow.StructuredValue)
+
+  field(:experimental_compile, 6,
+    type: Tensorflow.FunctionSpec.ExperimentalCompile,
+    enum: true
+  )
 end
 
 defmodule Tensorflow.SavedResource do
@@ -225,4 +283,18 @@ defmodule Tensorflow.SavedResource do
   defstruct [:device]
 
   field(:device, 1, type: :string)
+end
+
+defmodule Tensorflow.SaveableObject do
+  @moduledoc false
+  use Protobuf, syntax: :proto3
+
+  @type t :: %__MODULE__{
+          save_function: integer,
+          restore_function: integer
+        }
+  defstruct [:save_function, :restore_function]
+
+  field(:save_function, 2, type: :int32)
+  field(:restore_function, 3, type: :int32)
 end

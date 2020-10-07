@@ -24,8 +24,7 @@ defmodule Tensorflow.ResourceHandleProto do
           maybe_type_name: String.t(),
           dtypes_and_shapes: [
             Tensorflow.ResourceHandleProto.DtypeAndShape.t()
-          ],
-          allowed_devices: [String.t()]
+          ]
         }
   defstruct [
     :device,
@@ -33,8 +32,7 @@ defmodule Tensorflow.ResourceHandleProto do
     :name,
     :hash_code,
     :maybe_type_name,
-    :dtypes_and_shapes,
-    :allowed_devices
+    :dtypes_and_shapes
   ]
 
   field(:device, 1, type: :string)
@@ -47,6 +45,4 @@ defmodule Tensorflow.ResourceHandleProto do
     repeated: true,
     type: Tensorflow.ResourceHandleProto.DtypeAndShape
   )
-
-  field(:allowed_devices, 7, repeated: true, type: :string)
 end
