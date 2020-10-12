@@ -35,7 +35,7 @@ defmodule Extensor.NIF do
           path :: String.t(),
           tag :: String.t(),
           config_pb :: binary()
-        ) :: reference()
+        ) :: {reference(), binary()}
   def tf_load_saved_model(_path, _tag, _config_pb) do
     :erlang.nif_error(:nif_library_not_loaded)
   end
