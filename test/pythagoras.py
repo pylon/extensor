@@ -23,5 +23,5 @@ with tf.Session() as session:
     # save in the saved_model format, which can include non-const variables
     tf.saved_model.simple_save(session,
                                'test/data/pythagoras',
-                               inputs={'a': a, 'b': b},
-                               outputs={'c': c})
+                               inputs={'a_input': a, 'b_input': b},
+                               outputs={'c_output': c})

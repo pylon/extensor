@@ -39,14 +39,11 @@ defmodule Extensor.SessionTest do
     end
 
     # valid protobuf
-    {:ok, session} = Session.parse_frozen_graph(graph_def)
-    assert is_reference(session)
+    {:ok, _session} = Session.parse_frozen_graph(graph_def)
 
-    session = Session.parse_frozen_graph!(graph_def)
-    assert is_reference(session)
+    Session.parse_frozen_graph!(graph_def)
 
-    session = Session.parse_frozen_graph!(graph_def, config)
-    assert is_reference(session)
+    Session.parse_frozen_graph!(graph_def, config)
   end
 
   test "load frozen graph file" do
@@ -65,14 +62,11 @@ defmodule Extensor.SessionTest do
     end
 
     # valid file path
-    {:ok, session} = Session.load_frozen_graph(graph_path)
-    assert is_reference(session)
+    {:ok, _session} = Session.load_frozen_graph(graph_path)
 
-    session = Session.load_frozen_graph!(graph_path)
-    assert is_reference(session)
+    Session.load_frozen_graph!(graph_path)
 
-    session = Session.load_frozen_graph!(graph_path, config)
-    assert is_reference(session)
+    Session.load_frozen_graph!(graph_path, config)
   end
 
   test "load saved_model directory" do
@@ -98,21 +92,17 @@ defmodule Extensor.SessionTest do
     end
 
     # valid model
-    {:ok, session} = Session.load_saved_model(model_path)
-    assert is_reference(session)
+    {:ok, _session} = Session.load_saved_model(model_path)
 
-    session = Session.load_saved_model!(model_path)
-    assert is_reference(session)
+    Session.load_saved_model!(model_path)
 
-    session = Session.load_saved_model!(model_path, config)
-    assert is_reference(session)
+    Session.load_saved_model!(model_path, config)
 
-    session = Session.load_saved_model!(model_path, config, "serve")
-    assert is_reference(session)
+    Session.load_saved_model!(model_path, config, "serve")
   end
 
   test "run session" do
-    session = Session.load_frozen_graph!("test/data/pythagoras.pb")
+    session = Session.load_saved_model!("test/data/pythagoras")
 
     # missing input/output tensors
     input = %{
@@ -196,6 +186,24 @@ defmodule Extensor.SessionTest do
 
     output = Session.run!(session, input, ["c"])
     assert Tensor.to_list(output["c"]) == [[5], [13]]
+
+    # metagraph name mapping
+    input = %{
+      "a_input" => Tensor.from_list([3]),
+      "b_input" => Tensor.from_list([4])
+    }
+
+    {:ok, output} = Session.run(session, input, ["c_output"])
+    assert Tensor.to_list(output["c_output"]) == [5]
+
+    # metagraph output defaults
+    input = %{
+      "a_input" => Tensor.from_list([3]),
+      "b_input" => Tensor.from_list([4])
+    }
+
+    {:ok, output} = Session.run(session, input)
+    assert Tensor.to_list(output["c_output"]) == [5]
   end
 
   test "global parallelism" do

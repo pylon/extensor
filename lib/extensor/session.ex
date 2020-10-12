@@ -53,9 +53,12 @@ defmodule Extensor.Session do
   """
 
   alias Extensor.{NIF, Tensor}
-  alias Tensorflow.ConfigProto
+  alias Tensorflow.{ConfigProto, MetaGraphDef, SignatureDef}
 
-  @type t :: reference()
+  @type t :: %__MODULE__{
+          resource: reference(),
+          signatures: %{String.t() => SignatureDef.t()}
+        }
 
   @default_config ConfigProto.new()
 
@@ -87,6 +90,9 @@ defmodule Extensor.Session do
   }
 
   @tft2atom Map.new(@atom2tft, fn {k, v} -> {v, k} end)
+  @signature_default %SignatureDef{inputs: %{}, outputs: %{}}
+
+  defstruct [:resource, signatures: %{}]
 
   @doc "loads a custom op kernel library"
   @spec load_library(name :: String.t()) :: :ok | {:error, any()}
@@ -142,7 +148,11 @@ defmodule Extensor.Session do
           config :: %ConfigProto{}
         ) :: t() | no_return()
   def parse_frozen_graph!(graph_pb, config \\ @default_config) do
-    NIF.tf_parse_frozen_graph(graph_pb, ConfigProto.encode(config))
+    resource = NIF.tf_parse_frozen_graph(graph_pb, ConfigProto.encode(config))
+
+    %__MODULE__{
+      resource: resource
+    }
   end
 
   @doc "loads a saved_model from a directory path"
@@ -164,17 +174,34 @@ defmodule Extensor.Session do
           tag :: String.t()
         ) :: t() | no_return()
   def load_saved_model!(path, config \\ @default_config, tag \\ "serve") do
-    NIF.tf_load_saved_model(path, tag, ConfigProto.encode(config))
+    # load the saved model directory from the nif
+    {resource, metagraph} =
+      NIF.tf_load_saved_model(path, tag, ConfigProto.encode(config))
+
+    # parse the metagraph for signatures
+    metagraph = MetaGraphDef.decode(metagraph)
+
+    # return the session
+    %__MODULE__{
+      resource: resource,
+      signatures: metagraph.signature_def
+    }
   end
 
   @doc "executes a tensorflow session"
   @spec run(
           session :: t(),
           input_tensors :: %{String.t() => Tensor.t()},
-          output_names :: [String.t(), ...]
+          output_names :: [String.t(), ...] | nil,
+          signature :: String.t()
         ) :: {:ok, %{String.t() => Tensor.t()}} | {:error, any}
-  def run(session, input_tensors, output_names) do
-    {:ok, run!(session, input_tensors, output_names)}
+  def run(
+        session,
+        input_tensors,
+        output_names \\ nil,
+        signature \\ "serving_default"
+      ) do
+    {:ok, run!(session, input_tensors, output_names, signature)}
   rescue
     e -> {:error, e}
   end
@@ -183,24 +210,62 @@ defmodule Extensor.Session do
   @spec run!(
           session :: t(),
           input_tensors :: %{String.t() => Tensor.t()},
-          output_names :: [String.t(), ...]
+          output_names :: [String.t(), ...] | nil,
+          signature :: String.t()
         ) :: %{String.t() => Tensor.t()}
-  def run!(session, input_tensors, output_names) do
-    input_tensors = ex2tf(input_tensors)
-    output_tensors = NIF.tf_run_session(session, input_tensors, output_names)
-    tf2ex(output_tensors)
+  def run!(
+        session,
+        input_tensors,
+        output_names \\ nil,
+        signature \\ "serving_default"
+      ) do
+    # fetch the metadata for the requested signature and
+    # default the output tensors to the signature outputs
+    signature = session.signatures[signature] || @signature_default
+    output_names = output_names || Map.keys(signature.outputs)
+
+    # map the input names through the signaturedef mapping
+    # convert the input tensor structs to values accepted by the nif
+    input_tensors =
+      input_tensors
+      |> Map.new(fn {k, v} -> {sig2tensor(k, signature.inputs), ex2tf(v)} end)
+
+    # create a parallel list of mapped tensor names,
+    # so that we can invert the mapping on the other side
+    result_names =
+      output_names
+      |> Enum.map(&sig2tensor(&1, signature.outputs))
+
+    # run tensorflow inference
+    output_tensors =
+      NIF.tf_run_session(
+        session.resource,
+        input_tensors,
+        result_names
+      )
+
+    # map the output tensor names through the signaturedef mapping
+    # convert the nif tensor values to elixir tensor structs
+    Enum.zip(output_names, result_names)
+    |> Map.new(fn {s, t} -> {s, tf2ex(output_tensors[t])} end)
   end
 
-  defp ex2tf(tensors) do
-    Map.new(tensors, fn {k, v} ->
-      Tensor.validate!(v)
-      {k, {Map.fetch!(@atom2tft, v.type), v.shape, v.data}}
-    end)
+  # convert a metagraph signature name to a tensor name
+  defp sig2tensor(key, map) do
+    case map[key] do
+      %{encoding: {:name, key}} -> key
+      _ -> key
+    end
   end
 
-  defp tf2ex(tensors) do
-    Map.new(tensors, fn {k, {t, s, d}} ->
-      {k, %Tensor{type: Map.fetch!(@tft2atom, t), shape: s, data: d}}
-    end)
+  # convert an elixir tensor to a tensorflow tensor tuple
+  defp ex2tf(tensor) do
+    Tensor.validate!(tensor)
+    {Map.fetch!(@atom2tft, tensor.type), tensor.shape, tensor.data}
+  end
+
+  # convert a tensorflow tensor tuple to an elixir tensor
+  defp tf2ex({type, shape, data}) do
+    %Tensor{type: Map.fetch!(@tft2atom, type), shape: shape, data: data}
   end
 end

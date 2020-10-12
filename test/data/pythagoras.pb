@@ -4,9 +4,9 @@
 dtype0*
 shape:
 ,
-bPlaceholder*
-dtype0*
-shape:
+bPlaceholder*
+shape:*
+dtype0
 
 SquareSquarea*
 T0
