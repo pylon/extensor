@@ -16,7 +16,7 @@ RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     locale-gen
 RUN curl https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb > /tmp/erlang-solutions_1.0_all.deb && \
     dpkg -i /tmp/erlang-solutions_1.0_all.deb && \
-    apt-get update -qq && apt-get install -y esl-erlang=1:22.3.4-1 elixir=1.9.4-1 && \
+    apt-get update -qq && apt-get install -y esl-erlang=1:23.1-1 elixir=1.10.4-1 && \
     mix local.rebar --force && \
     mix local.hex --force
 
