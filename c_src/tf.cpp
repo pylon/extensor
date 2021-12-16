@@ -227,17 +227,14 @@ ERL_NIF_TERM nif_tf_load_saved_model (
    TF_Graph* graph = NULL;
    TF_SessionOptions* session_options = NULL;
    TF_Session* session = NULL;
+   TF_Buffer* metagraph = NULL;
    ERL_NIF_TERM result;
    try {
       // allocate configuration/graph objects
       status          = CHECKALLOC(TF_NewStatus());
       graph           = CHECKALLOC(TF_NewGraph());
       session_options = CHECKALLOC(TF_NewSessionOptions());
-      // initialize the metagraph output buffer
-      // note: while tensorflow returns this buffer to us, it maintains
-      //       ownership of it inside the session, so we don't free it,
-      //       unlike the other objects returned to us
-      TF_Buffer metagraph; memset(&metagraph, 0, sizeof(metagraph));
+      metagraph       = CHECKALLOC(TF_NewBuffer());
       // retrieve the model path
       ErlNifBinary path_bin; memset(&path_bin, 0, sizeof(path_bin));
       CHECK(enif_inspect_binary(env, argv[0], &path_bin), "invalid_path");
@@ -266,7 +263,7 @@ ERL_NIF_TERM nif_tf_load_saved_model (
          tag_strs,
          1,
          graph,
-         &metagraph,
+         metagraph,
          status);
       tf_check_status(status);
       // create the erlang resource to wrap the session
@@ -281,9 +278,9 @@ ERL_NIF_TERM nif_tf_load_saved_model (
       ERL_NIF_TERM metagraph_bin;
       void* metagraph_data = CHECKALLOC(enif_make_new_binary(
          env,
-         metagraph.length,
+         metagraph->length,
          &metagraph_bin));
-      memcpy(metagraph_data, metagraph.data, metagraph.length);
+      memcpy(metagraph_data, metagraph->data, metagraph->length);
       // relinquish the model resource and metagraph to erlang
       result = enif_make_tuple2(env,
                                 enif_make_resource(env, resource),
@@ -293,6 +290,8 @@ ERL_NIF_TERM nif_tf_load_saved_model (
       result = e.to_term(env);
    }
    // cleanup
+   if (metagraph != NULL)
+      TF_DeleteBuffer(metagraph);
    if (session != NULL)
       TF_DeleteSession(session, status);
    if (status != NULL)
